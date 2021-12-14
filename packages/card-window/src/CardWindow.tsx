@@ -89,7 +89,7 @@ export const getRenderItemProps = (
   return items;
 };
 
-export const getNextScrollOffset = (
+export const getNextOffset = (
   offset: number,
   beforeCols: number,
   afterCols: number,
@@ -136,7 +136,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
       colsRef.current = cols;
     } else {
       if (colsRef.current !== cols && containerRef.current) {
-        containerRef.current.scrollTop = getNextScrollOffset(offset, colsRef.current, cols, card.height);
+        containerRef.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
         colsRef.current = cols;
       }
     }
