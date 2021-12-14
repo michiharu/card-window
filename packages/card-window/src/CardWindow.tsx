@@ -111,7 +111,7 @@ export type CardWindowProps<T extends Array<any> = any[]> = {
   loading?: Loading;
 };
 
-const CardVirtualizer: React.FC<CardWindowProps> = (props) => {
+const CardWindow: React.FC<CardWindowProps> = (props) => {
   const { card, data, overScanPx = 100, justifyContent = 'space-evenly', children: Children } = props;
   const containerRef = React.useRef<HTMLDivElement>();
   const [container, setContainer] = React.useState<Rect>({ width: 0, height: 0 });
@@ -158,4 +158,4 @@ const CardVirtualizer: React.FC<CardWindowProps> = (props) => {
   );
 };
 
-export default CardVirtualizer;
+export default CardWindow;

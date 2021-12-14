@@ -1,2 +1,2 @@
-export { default as CardVirtualizer } from './CardWindow';
+export { default as CardWindow } from './CardWindow';
 export * from './CardWindow';
