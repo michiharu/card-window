@@ -6,7 +6,10 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "npx sort-package-json"
+    "postinstall": "npx sort-package-json",
+    "build": "lerna run build --scope card-window",
+    "watch": "lerna run watch --scope card-window",
+    "package": "lerna exec --scope card-window -- npm pack"
   },
   "devDependencies": {
     "@types/react": "^17.0.37",
