@@ -11,13 +11,14 @@ type Loading = {
   loadMoreItems: () => void;
 };
 
-const useResizeObserver = (
-  ref: React.MutableRefObject<HTMLDivElement>,
-  resize: ResizeObserverCallback,
-  set: (rect: Rect) => void
-) => {
+const useResizeObserver = (initial: Rect = { width: 0, height: 0 }): [Rect, React.MutableRefObject<HTMLDivElement>] => {
+  const [rect, set] = React.useState<Rect>(initial);
+  const ref = React.useRef<HTMLDivElement>();
   React.useEffect(() => {
-    const resizeObserver = new ResizeObserver(resize);
+    const resizeObserver = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      set({ width, height });
+    });
     if (ref.current) {
       resizeObserver.observe(ref.current);
       const { width, height } = ref.current.getBoundingClientRect();
@@ -25,6 +26,7 @@ const useResizeObserver = (
     }
     return () => resizeObserver.disconnect();
   }, []);
+  return [rect, ref];
 };
 
 export const getScrollDivHeight = (cols: number, itemSize: number, card: Rect, loading?: Loading): number => {
@@ -89,15 +91,10 @@ export const getRenderItemProps = (
   return items;
 };
 
-export const getNextOffset = (
-  offset: number,
-  beforeCols: number,
-  afterCols: number,
-  cardHeight: number
-): number => {
+export const getNextOffset = (offset: number, beforeCols: number, afterCols: number, cardHeight: number): number => {
   const remainingOffset = cardHeight - (offset % cardHeight);
   const beforeRow = Math.ceil(offset / cardHeight);
-  const afterRow = Math.round(beforeRow * beforeCols / afterCols);
+  const afterRow = Math.round((beforeRow * beforeCols) / afterCols);
   return afterRow * cardHeight - remainingOffset;
 };
 
@@ -112,16 +109,8 @@ export type CardWindowProps<T extends Array<any> = any[]> = {
 
 const CardWindow: React.FC<CardWindowProps> = (props) => {
   const { card, data, overScanPx = 100, justifyContent = 'space-evenly', children: Children } = props;
-  const containerRef = React.useRef<HTMLDivElement>();
-  const [container, setContainer] = React.useState<Rect>({ width: 0, height: 0 });
   const [offset, setOffset] = React.useState(0);
-
-  const handleResize: ResizeObserverCallback = (entries) => {
-    const { width, height } = entries[0].contentRect;
-    setContainer({ width, height });
-  };
-
-  useResizeObserver(containerRef, handleResize, setContainer);
+  const [container, ref] = useResizeObserver();
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = React.useCallback(
     (e) => setOffset(e.currentTarget.scrollTop),
@@ -135,8 +124,8 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     if (colsRef.current === 0 && cols !== 0) {
       colsRef.current = cols;
     } else {
-      if (colsRef.current !== cols && containerRef.current) {
-        containerRef.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
+      if (colsRef.current !== cols && ref.current) {
+        ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
         colsRef.current = cols;
       }
     }
@@ -147,7 +136,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const items = getRenderItemProps(cols, container, card, data.length, offset, overScanPx, justifyContent);
 
   return (
-    <div ref={containerRef} style={containerStyle} onScroll={handleScroll}>
+    <div ref={ref} style={containerStyle} onScroll={handleScroll}>
       <div style={{ width: '100%', height: scrollDivHeight, position: 'relative' }}>
         {items.map((item) => (
           <Children key={item.index} data={data} {...item} />
