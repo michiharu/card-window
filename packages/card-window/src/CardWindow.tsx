@@ -95,11 +95,10 @@ export const getNextScrollOffset = (
   afterCols: number,
   cardHeight: number
 ): number => {
-  const delta = cardHeight - (offset % cardHeight);
-  const beforeVisibleFirstRow = Math.ceil(offset / cardHeight);
-  const hiddenItemSize = beforeVisibleFirstRow * beforeCols;
-  const afterVisibleFirstRow = Math.floor(hiddenItemSize / afterCols);
-  return afterVisibleFirstRow * cardHeight - delta;
+  const remainingOffset = cardHeight - (offset % cardHeight);
+  const beforeRow = Math.ceil(offset / cardHeight);
+  const afterRow = Math.round(beforeRow * beforeCols / afterCols);
+  return afterRow * cardHeight - remainingOffset;
 };
 
 export type CardWindowProps<T extends Array<any> = any[]> = {
