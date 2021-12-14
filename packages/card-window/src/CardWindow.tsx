@@ -89,17 +89,16 @@ export const getRenderItemProps = (
   return items;
 };
 
-export const getNextScrollOffset = (
+export const getNextOffset = (
   offset: number,
   beforeCols: number,
   afterCols: number,
   cardHeight: number
 ): number => {
-  const delta = cardHeight - (offset % cardHeight);
-  const beforeVisibleFirstRow = Math.ceil(offset / cardHeight);
-  const hiddenItemSize = beforeVisibleFirstRow * beforeCols;
-  const afterVisibleFirstRow = Math.floor(hiddenItemSize / afterCols);
-  return afterVisibleFirstRow * cardHeight - delta;
+  const remainingOffset = cardHeight - (offset % cardHeight);
+  const beforeRow = Math.ceil(offset / cardHeight);
+  const afterRow = Math.round(beforeRow * beforeCols / afterCols);
+  return afterRow * cardHeight - remainingOffset;
 };
 
 export type CardWindowProps<T extends Array<any> = any[]> = {
@@ -137,7 +136,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
       colsRef.current = cols;
     } else {
       if (colsRef.current !== cols && containerRef.current) {
-        containerRef.current.scrollTop = getNextScrollOffset(offset, colsRef.current, cols, card.height);
+        containerRef.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
         colsRef.current = cols;
       }
     }
