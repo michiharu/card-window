@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "build": "lerna run build --scope card-window",
+    "fix": "lerna run fix",
     "postinstall": "npx sort-package-json",
     "package": "lerna exec --scope card-window -- npm pack",
     "watch": "lerna run watch --scope card-window"
