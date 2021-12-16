@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-type CardProps<T extends Array<any>> = { data: T; index: number; style: React.CSSProperties };
-type Card<T extends Array<any>> = React.ComponentType<CardProps<T>>;
+type CardProps<T extends Array<unknown>> = { data: T; index: number; style: React.CSSProperties };
+type Card<T extends Array<unknown>> = React.ComponentType<CardProps<T>>;
 type Rect = { width: number; height: number };
 type JustifyContent = 'start' | 'center' | 'space-evenly' | 'space-around';
 type Loading = {
@@ -29,7 +29,7 @@ const useResizeObserver = (initial: Rect = { width: 0, height: 0 }): [Rect, Reac
   return [rect, ref];
 };
 
-export const getScrollDivHeight = (cols: number, itemSize: number, card: Rect, loading?: Loading): number => {
+export const getScrollDivHeight = (cols: number, itemSize: number, card: Rect): number => {
   if (cols === 0) return 0;
   const rows = Math.ceil(itemSize / cols);
   return rows * card.height;
@@ -65,6 +65,8 @@ export const getCardStyle = (
       const left = (colWidth - card.width) / 2 + colWidth * col;
       return { ...common, left };
     }
+    default:
+      throw new Error();
   }
 };
 
@@ -81,7 +83,7 @@ export const getRenderItemProps = (
   const startIndex = Math.max(0, Math.floor((offset - overScanPx) / card.height) * cols);
   const stopIndex = Math.min(itemSize - 1, Math.ceil((offset + container.height + overScanPx) / card.height) * cols);
   const items: { index: number; style: React.CSSProperties }[] = [];
-  for (let index = startIndex; index <= stopIndex; index++) {
+  for (let index = startIndex; index <= stopIndex; index += 1) {
     items.push({
       index,
       style: getCardStyle(index, cols, justifyContent, card, container.width),
@@ -98,7 +100,7 @@ export const getNextOffset = (offset: number, beforeCols: number, afterCols: num
   return afterRow * cardHeight - remainingOffset;
 };
 
-export type CardWindowProps<T extends Array<any> = any[]> = {
+export type CardWindowProps<T extends Array<unknown> = unknown[]> = {
   card: Rect;
   data: T;
   children: Card<T>;
@@ -121,14 +123,10 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const cols = Math.floor(container.width / card.width);
 
   React.useEffect(() => {
-    if (colsRef.current === 0 && cols !== 0) {
-      colsRef.current = cols;
-    } else {
-      if (colsRef.current !== cols && ref.current) {
-        ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
-        colsRef.current = cols;
-      }
+    if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
+      ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
     }
+    colsRef.current = cols;
   }, [cols]);
 
   const containerStyle: React.CSSProperties = { width: '100%', minWidth: card.width, height: '100%', overflow: 'auto' };
