@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "include": [
     "src/**/*.ts",
-    ".eslintrc.js"
+    ".eslintrc.js",
+    "rollup.config.js"
   ],
   "exclude": [
     "node_modules",
