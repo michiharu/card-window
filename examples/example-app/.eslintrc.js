@@ -14,6 +14,7 @@ module.exports = {
   parserOptions: { project: './tsconfig.eslint.json', tsconfigRootDir: __dirname },
   rules: {
     'max-len': ['error', { code: 120 }],
+    'import/no-extraneous-dependencies': 'off',
 
     'react/function-component-definition': [2, { namedComponents: 'arrow-function' }],
     'react/jsx-props-no-spreading': 'off',
