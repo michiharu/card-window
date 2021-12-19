@@ -15,6 +15,7 @@ module.exports = {
   rules: {
     'max-len': ['error', { code: 120 }],
     'import/no-extraneous-dependencies': 'off',
+    'import/prefer-default-export': 'off',
 
     'react/function-component-definition': [2, { namedComponents: 'arrow-function' }],
     'react/jsx-props-no-spreading': 'off',

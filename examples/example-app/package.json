@@ -9,7 +9,7 @@
     "fix": "npm run format && npm run lint && npx sort-package-json",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "lint": "eslint --fix --ext .ts,.tsx ./src",
-    "sb": "start-storybook -p 6006 -s public",
+    "sb": "start-storybook -p 6006 -s public --docs",
     "start": "react-scripts start",
     "test": "react-scripts test"
   },

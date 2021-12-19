@@ -1,0 +1,30 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+import * as stories from './Demo.stories.tsx';
+import Demo from './Demo';
+
+<Meta title="Demo" component={Demo} />
+
+# Basic Usage
+
+The required Props are the data, the card size, and the children function that renders the card components.
+
+<Story story={stories.basic} />
+
+```typescript
+const BasicDemo: React.FC = () => {
+  const data = [...Array(10000)].map((_, i) => i);
+  return (
+    <div style={{ width: '90vw', height: '40vh' }}>
+      <CardWindow data={data} card={{ width: 200, height: 100 }} justifyContent={justifyContent}>
+        {({ index, style }) => (
+          <div style={{ ...style, height: 84, backgroundColor: '#0001' }}>
+            <div style={{ padding: 16 }}>
+              <h2>{index}</h2>
+            </div>
+          </div>
+        )}
+      </CardWindow>
+    </div>
+  );
+};
+```
