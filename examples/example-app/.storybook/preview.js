@@ -6,9 +6,10 @@ export const parameters = {
       date: /Date$/,
     },
   },
-  previewTabs: {
-    canvas: {
-      hidden: true,
+  previewTabs: { canvas: { hidden: true } },
+  options: {
+    storySort: {
+      order: ['Introduction', 'Demo'], 
     },
   },
 }

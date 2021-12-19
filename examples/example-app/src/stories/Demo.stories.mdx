@@ -1,8 +1,9 @@
-import { Meta, Story } from '@storybook/addon-docs/blocks';
+import { ArgsTable, Meta, Story } from '@storybook/addon-docs/blocks';
 import * as stories from './Demo.stories.tsx';
+import { CardWindow } from 'card-window';
 import Demo from './Demo';
 
-<Meta title="Demo" component={Demo} />
+<Meta title="Demo/Basic" component={Demo} />
 
 # Basic Usage
 
@@ -11,6 +12,9 @@ The required Props are the data, the card size, and the children function that r
 <Story story={stories.basic} />
 
 ```typescript
+import * as React from 'react';
+import { CardWindow } from 'card-window';
+
 const BasicDemo: React.FC = () => {
   const data = [...Array(10000)].map((_, i) => i);
   return (
@@ -28,3 +32,5 @@ const BasicDemo: React.FC = () => {
   );
 };
 ```
+
+<ArgsTable of={CardWindow} />

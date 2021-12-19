@@ -17,6 +17,8 @@ yarn add card-window
 
 ## Usage
 
+Lean more at [michiharu.github.io/card-window/](https://michiharu.github.io/card-window/?path=/docs/introduction--page)
+
 ```typescript
 import * as React from 'react';
 import ReactDOM from 'react-dom';
