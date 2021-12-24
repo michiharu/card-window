@@ -1,17 +1,19 @@
 import * as React from 'react';
 
-type CardProps<T extends Array<unknown>> = { data: T; index: number; style: React.CSSProperties };
-type Card<T extends Array<unknown>> = React.ComponentType<CardProps<T>>;
-type Rect = { width: number; height: number };
-type JustifyContent = 'start' | 'center' | 'space-evenly' | 'space-around';
-type Loading = {
+export type CardProps<T extends Array<unknown>> = { data: T; index: number; style: React.CSSProperties };
+export type Card<T extends Array<unknown>> = React.ComponentType<CardProps<T>>;
+export type Rect = { width: number; height: number };
+export type JustifyContent = 'start' | 'center' | 'space-evenly' | 'space-around';
+export type Loading = {
   type: 'card' | 'row';
   loadingRect: Rect;
   LoadingComponent: React.ReactNode;
   loadMoreItems: () => void;
 };
 
-const useResizeObserver = (initial: Rect = { width: 0, height: 0 }): [Rect, React.MutableRefObject<HTMLDivElement>] => {
+export const useResizeObserver = (
+  initial: Rect = { width: 0, height: 0 }
+): [Rect, React.MutableRefObject<HTMLDivElement>] => {
   const [rect, set] = React.useState<Rect>(initial);
   const ref = React.useRef<HTMLDivElement>();
   React.useEffect(() => {
@@ -101,16 +103,28 @@ export const getNextOffset = (offset: number, beforeCols: number, afterCols: num
 };
 
 export type CardWindowProps<T extends Array<unknown> = unknown[]> = {
-  card: Rect;
   data: T;
+  cardRect: Rect;
   children: Card<T>;
+  getKey?: (index: number, data: T) => string;
+  style?: Omit<React.CSSProperties, 'overflow'>;
+  innerStyle?: Omit<React.CSSProperties, 'position' | 'width' | 'height'>;
   overScanPx?: number;
   justifyContent?: JustifyContent;
   loading?: Loading;
 };
 
 const CardWindow: React.FC<CardWindowProps> = (props) => {
-  const { card, data, overScanPx = 100, justifyContent = 'space-evenly', children: Children } = props;
+  const {
+    data,
+    cardRect,
+    children: Children,
+    getKey = (index) => index,
+    style = {},
+    innerStyle = {},
+    overScanPx = 1000,
+    justifyContent = 'space-evenly',
+  } = props;
   const [offset, setOffset] = React.useState(0);
   const [container, ref] = useResizeObserver();
 
@@ -120,24 +134,25 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   );
 
   const colsRef = React.useRef(0);
-  const cols = Math.floor(container.width / card.width);
+  const cols = Math.floor(container.width / cardRect.width);
 
   React.useEffect(() => {
     if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
-      ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card.height);
+      ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, cardRect.height);
     }
     colsRef.current = cols;
   }, [cols]);
 
-  const containerStyle: React.CSSProperties = { width: '100%', minWidth: card.width, height: '100%', overflow: 'auto' };
-  const scrollDivHeight = getScrollDivHeight(cols, data.length, card);
-  const items = getRenderItemProps(cols, container, card, data.length, offset, overScanPx, justifyContent);
+  const rootStyle = { width: '100%', minWidth: cardRect.width, height: '100%', ...style, overflow: 'auto' };
+  const height = getScrollDivHeight(cols, data.length, cardRect);
+  const scrollStyle: React.CSSProperties = { ...innerStyle, position: 'relative', width: '100%', height };
+  const items = getRenderItemProps(cols, container, cardRect, data.length, offset, overScanPx, justifyContent);
 
   return (
-    <div ref={ref} style={containerStyle} onScroll={handleScroll}>
-      <div style={{ width: '100%', height: scrollDivHeight, position: 'relative' }}>
+    <div ref={ref} style={rootStyle} onScroll={handleScroll}>
+      <div style={scrollStyle}>
         {items.map((item) => (
-          <Children key={item.index} data={data} {...item} />
+          <Children key={getKey(item.index, data)} data={data} {...item} />
         ))}
       </div>
     </div>
