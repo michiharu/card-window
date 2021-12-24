@@ -20,6 +20,7 @@ module.exports = {
     'react/function-component-definition': [2, { namedComponents: 'arrow-function' }],
     'react/jsx-props-no-spreading': 'off',
     'react/require-default-props': 'off',
+    'react/prop-types': 'off',
 
     'sort-imports': ['error', { ignoreDeclarationSort: true }],
     'import/order': [
