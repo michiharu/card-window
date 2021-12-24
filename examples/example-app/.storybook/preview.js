@@ -1,5 +1,5 @@
 export const parameters = {
-  actions: { argTypesRegex: "^on[A-Z].*" },
+  actions: { argTypesRegex: '^on[A-Z].*' },
   controls: {
     matchers: {
       color: /(background|color)$/i,
@@ -7,9 +7,10 @@ export const parameters = {
     },
   },
   previewTabs: { canvas: { hidden: true } },
+  docs: { source: { type: 'code' } },
   options: {
     storySort: {
-      order: ['Introduction', 'Demo'], 
+      order: ['Introduction', 'Examples'],
     },
   },
-}
+};
