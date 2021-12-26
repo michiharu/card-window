@@ -14,34 +14,35 @@ const FeatureList: FeatureItem[] = [
     image: '/img/undraw_docusaurus_mountain.svg',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Card Window requires only 3 props.<br />
+        And it has simple option props.<br />
+        Check out the tutorial right away!
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Automatically Adjust Columns',
     image: '/img/undraw_docusaurus_tree.svg',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        The card window uses <code>ResizeObserver</code> internally. Therefore, the column is automatically adjusted
+        according to the element size specified by CSS.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Inspired by "react-window"',
     image: '/img/undraw_docusaurus_react.svg',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        It works by only rendering part of a large data set (just enough to fill the viewport).
+        It is very much inspired by Brian Vaughn's react-window.
       </>
     ),
   },
 ];
 
-function Feature({title, image, description}: FeatureItem) {
+function Feature({ title, image, description }: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
