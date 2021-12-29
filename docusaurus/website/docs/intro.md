@@ -2,34 +2,55 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Introduction
 
-Let's discover **Docusaurus in less than 5 minutes**.
+## Installation
 
-## Getting Started
+card-window is available as an npm package.
 
-Get started by **creating a new site**.
+### with npm
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**:
-
-```shell
-npm init docusaurus@latest my-website classic
+```bash
+npm install card-window
 ```
 
-## Start your site
+### with yarn
 
-Run the development server:
-
-```shell
-cd my-website
-
-npx docusaurus start
+```bash
+yarn add card-window
 ```
 
-Your site starts at `http://localhost:3000`.
+## Usage
 
-Open `docs/intro.md` and edit some lines: the site **reloads automatically** and displays your changes.
+```typescript
+import * as React from 'react';
+import ReactDOM from 'react-dom';
+
+import { CardWindow } from 'card-window';
+
+type CardProps = {
+  data: any[];
+  index: number;
+  style: React.CSSProperties;
+};
+
+const Card: React.FC<CardProps> = ({ data, index, style }) => (
+  <div style={{ ...style, backgroundColor: '#fff' }}>
+    <div style={{ padding: 16 }}>
+      <h2>{data[index]}</h2>
+    </div>
+  </div>
+);
+
+const App: React.FC = () => {
+  const data = [...Array(10000)].map((_, i) => i);
+  const cardRect = { width: 300, height: 200 };
+  return (
+    <CardWindow data={data} cardRect={cardRect} >
+      {Card}
+    </CardWindow>
+  );
+};
+
+ReactDOM.render(<App />, document.querySelector('#app'));
+```

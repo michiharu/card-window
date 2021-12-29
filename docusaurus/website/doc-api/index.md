@@ -1,7 +1,7 @@
 ---
 id: "index"
 title: "card-window"
-slug: "/api/"
+slug: "/../doc-api/"
 sidebar_label: "Readme"
 sidebar_position: 0
 custom_edit_url: null

@@ -11,7 +11,7 @@ const config = {
   title,
   tagline: 'It renders only visible cards',
   url: 'https://your-docusaurus-test-site.com',
-  baseUrl: '/',
+  baseUrl: '/card-window/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -23,6 +23,7 @@ const config = {
       'docusaurus-plugin-typedoc',
       {
         entryPoints: ['../../packages/card-window/src/index.ts'],
+        out: '../doc-api',
         tsconfig: '../../packages/card-window/tsconfig.json',
       },
     ],
@@ -38,13 +39,14 @@ const config = {
           // Please change this to your repo.
           editUrl: 'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
       }),
     ],
   ],
-
+  themes: ['@docusaurus/theme-live-codeblock'],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({

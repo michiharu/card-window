@@ -1,0 +1,88 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Basic Examples
+
+## Minimal usage
+
+### Play ground
+
+```jsx live
+function App() {
+  const items = [...Array(1000)].map((_, i) => i);
+  const cardRect = { width: 300, height: 200 };
+  return (
+    <div style={{ height: 400 }}>
+      <CardWindow data={items} cardRect={cardRect}>
+        {Card}
+      </CardWindow>
+    </div>
+  );
+}
+```
+
+### Sample Card
+
+The CardProps definition is [here](../api#cardprops).
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```jsx
+const Card = ({ data, index, style }) => (
+  <div style={{ ...style }}>
+    <h2>{data[index]}</h2>
+  </div>
+);
+```
+
+</TabItem>
+<TabItem value="py" label="TypeScript">
+
+```tsx
+const Card: React.FC<CardProps> = ({ data, index, style }) => (
+  <div style={{ ...style }}>
+    <h2>{data[index]}</h2>
+  </div>
+);
+```
+
+</TabItem>
+</Tabs>
+
+### Required roperties
+
+CardWindow has 3 required properties. Type parameter is `T extends any[]`.
+
+| Name       | Type                                          |
+| :--------- | :-------------------------------------------- |
+| `children` | [`CardComponent`](../api#cardcomponent)<`T`\> |
+| `cardRect` | [`Rect`](../api#rect)                         |
+| `data`     | `T`                                           |
+
+## Style
+
+By default, CardWindow has the style `{ width: '100%', height: '100%' }`. These styles can be overridden.
+
+```jsx live
+function App() {
+  const items = [...Array(1000)].map((_, i) => i);
+  const cardRect = { width: 300, height: 200 };
+  const style = { height: 400 };
+  return (
+    <CardWindow data={items} cardRect={cardRect} style={style}>
+      {({ index, style }) => (
+        <div className="card" style={{ ...style, height: style.height - 16 }}>
+          <div style={{ padding: 16 }}>
+            <h2>{index}</h2>
+          </div>
+        </div>
+      )}
+    </CardWindow>
+  );
+}
+```
