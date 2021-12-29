@@ -2,8 +2,8 @@
   "name": "card-window-dev",
   "private": true,
   "workspaces": [
-    "examples/*",
-    "packages/*"
+    "packages/*",
+    "docusaurus/*"
   ],
   "scripts": {
     "build": "lerna run build --scope card-window",

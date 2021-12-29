@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 export type CardProps<T extends Array<unknown>> = { data: T; index: number; style: React.CSSProperties };
-export type Card<T extends Array<unknown>> = React.ComponentType<CardProps<T>>;
+export type CardComponent<T extends Array<unknown>> = React.ComponentType<CardProps<T>>;
 export type Rect = { width: number; height: number };
 export type JustifyContent = 'start' | 'center' | 'space-evenly' | 'space-around';
 export type Loading = {
@@ -31,13 +31,13 @@ export const useResizeObserver = (
   return [rect, ref];
 };
 
-export const getScrollDivHeight = (cols: number, itemSize: number, card: Rect): number => {
+const getScrollDivHeight = (cols: number, itemSize: number, card: Rect): number => {
   if (cols === 0) return 0;
   const rows = Math.ceil(itemSize / cols);
   return rows * card.height;
 };
 
-export const getCardStyle = (
+const getCardStyle = (
   index: number,
   cols: number,
   justifyContent: JustifyContent,
@@ -72,7 +72,7 @@ export const getCardStyle = (
   }
 };
 
-export const getRenderItemProps = (
+const getRenderItemProps = (
   cols: number,
   container: Rect,
   card: Rect,
@@ -95,7 +95,7 @@ export const getRenderItemProps = (
   return items;
 };
 
-export const getNextOffset = (offset: number, beforeCols: number, afterCols: number, cardHeight: number): number => {
+const getNextOffset = (offset: number, beforeCols: number, afterCols: number, cardHeight: number): number => {
   const remainingOffset = cardHeight - (offset % cardHeight);
   const beforeRow = Math.ceil(offset / cardHeight);
   const afterRow = Math.round((beforeRow * beforeCols) / afterCols);
@@ -105,7 +105,7 @@ export const getNextOffset = (offset: number, beforeCols: number, afterCols: num
 export type CardWindowProps<T extends Array<unknown> = unknown[]> = {
   data: T;
   cardRect: Rect;
-  children: Card<T>;
+  children: CardComponent<T>;
   getKey?: (index: number, data: T) => string;
   style?: Omit<React.CSSProperties, 'overflow'>;
   innerStyle?: Omit<React.CSSProperties, 'position' | 'width' | 'height'>;
