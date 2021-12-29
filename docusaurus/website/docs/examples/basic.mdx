@@ -34,8 +34,10 @@ The CardProps definition is [here](../api#cardprops).
 
 ```jsx
 const Card = ({ data, index, style }) => (
-  <div style={{ ...style }}>
-    <h2>{data[index]}</h2>
+  <div className="card" style={{ ...style }}>
+    <div className="card__body">
+      <h2>{data[index]}</h2>
+    </div>
   </div>
 );
 ```
@@ -45,8 +47,10 @@ const Card = ({ data, index, style }) => (
 
 ```tsx
 const Card: React.FC<CardProps> = ({ data, index, style }) => (
-  <div style={{ ...style }}>
-    <h2>{data[index]}</h2>
+  <div className="card" style={{ ...style }}>
+    <div className="card__body">
+      <h2>{data[index]}</h2>
+    </div>
   </div>
 );
 ```
@@ -54,7 +58,7 @@ const Card: React.FC<CardProps> = ({ data, index, style }) => (
 </TabItem>
 </Tabs>
 
-### Required roperties
+### Required properties
 
 CardWindow has 3 required properties. Type parameter is `T extends any[]`.
 
