@@ -8,22 +8,6 @@ custom_edit_url: null
 
 ## Type aliases
 
-### CardComponent
-
-Ƭ **CardComponent**<`T`\>: `React.ComponentType`<[`CardProps`](modules#cardprops)<`T`\>\>
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | extends `unknown`[] |
-
-#### Defined in
-
-[CardWindow.tsx:4](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L4)
-
-___
-
 ### CardProps
 
 Ƭ **CardProps**<`T`\>: `Object`
@@ -44,7 +28,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:3](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L3)
+[CardWindow.tsx:3](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L3)
 
 ___
 
@@ -56,17 +40,18 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `unknown`[] = `unknown`[] |
+| `T` | extends `any`[] = `any`[] |
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
 | `cardRect` | [`Rect`](modules#rect) |
-| `children` | [`CardComponent`](modules#cardcomponent)<`T`\> |
+| `children` | `React.ComponentType`<[`CardProps`](modules#cardprops)<`T`\>\> |
+| `className?` | `string` |
 | `data` | `T` |
 | `innerStyle?` | `Omit`<`React.CSSProperties`, ``"position"`` \| ``"width"`` \| ``"height"``\> |
-| `justifyContent?` | [`JustifyContent`](modules#justifycontent) |
+| `justifyContent?` | `React.CSSProperties`[``"justifyContent"``] |
 | `loading?` | [`Loading`](modules#loading) |
 | `overScanPx?` | `number` |
 | `style?` | `Omit`<`React.CSSProperties`, ``"overflow"``\> |
@@ -74,7 +59,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:105](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L105)
+[CardWindow.tsx:75](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L75)
 
 ___
 
@@ -84,7 +69,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:6](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L6)
+[CardWindow.tsx:5](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L5)
 
 ___
 
@@ -103,7 +88,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:7](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L7)
+[CardWindow.tsx:6](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L6)
 
 ___
 
@@ -120,7 +105,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:5](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L5)
+[CardWindow.tsx:4](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L4)
 
 ## Variables
 
@@ -130,7 +115,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:117](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L117)
+[CardWindow.tsx:88](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L88)
 
 ## Functions
 
@@ -150,4 +135,4 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:14](https://github.com/michiharu/card-window/blob/6871f34/packages/card-window/src/CardWindow.tsx#L14)
+[CardWindow.tsx:13](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L13)

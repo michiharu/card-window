@@ -9,7 +9,7 @@ import React from 'react';
 import { CardWindow } from 'card-window';
 
 const Card = ({ index, style }) => (
-  <div className="card" style={{ ...style, height: style.height - 16 }}>
+  <div className="card" style={style}>
     <div className="card__body">
       <h2>{index}</h2>
     </div>
