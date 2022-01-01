@@ -12,11 +12,13 @@ custom_edit_url: null
 
 Ƭ **CardProps**<`T`\>: `Object`
 
+CardWindow provides `children` component with this props.
+
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `unknown`[] |
+| `T` | extends `any`[] |
 
 #### Type declaration
 
@@ -28,7 +30,7 @@ custom_edit_url: null
 
 #### Defined in
 
-[CardWindow.tsx:3](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L3)
+[CardWindow.tsx:4](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L4)
 
 ___
 
@@ -44,32 +46,36 @@ ___
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `cardRect` | [`Rect`](modules#rect) |
-| `children` | `React.ComponentType`<[`CardProps`](modules#cardprops)<`T`\>\> |
-| `className?` | `string` |
-| `data` | `T` |
-| `innerStyle?` | `Omit`<`React.CSSProperties`, ``"position"`` \| ``"width"`` \| ``"height"``\> |
-| `justifyContent?` | `React.CSSProperties`[``"justifyContent"``] |
-| `loading?` | [`Loading`](modules#loading) |
-| `overScanPx?` | `number` |
-| `style?` | `Omit`<`React.CSSProperties`, ``"overflow"``\> |
-| `getKey?` | (`index`: `number`, `data`: `T`) => `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cardRect` | [`Rect`](modules#rect) | - |
+| `children` | `React.ComponentType`<[`CardProps`](modules#cardprops)<`T`\>\> | - |
+| `className?` | `string` | - |
+| `data` | `T` | `data` is an array. CardWindow passes data to `children` component. |
+| `innerStyle?` | `Omit`<`React.CSSProperties`, ``"position"`` \| ``"width"`` \| ``"height"``\> | - |
+| `justifyContent?` | [`JustifyContent`](modules#justifycontent) | - |
+| `lastRowAlign?` | `LastRowAlign` | - |
+| `loading?` | [`Loading`](modules#loading) | - |
+| `overScanPx?` | `number` | - |
+| `spacing?` | `Partial`<[`Spacing`](modules#spacing)\> | - |
+| `style?` | `Omit`<`React.CSSProperties`, ``"overflow"``\> | - |
+| `getKey?` | (`index`: `number`, `data`: `T`) => `string` | - |
 
 #### Defined in
 
-[CardWindow.tsx:75](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L75)
+[CardWindow.tsx:19](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L19)
 
 ___
 
 ### JustifyContent
 
-Ƭ **JustifyContent**: ``"start"`` \| ``"center"`` \| ``"space-evenly"`` \| ``"space-around"``
+Ƭ **JustifyContent**: ``"left"`` \| ``"right"`` \| ``"center"`` \| ``"space-around"`` \| ``"space-between"`` \| ``"space-evenly"``
+
+JustifyContent only supports 6 values.
 
 #### Defined in
 
-[CardWindow.tsx:5](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L5)
+[CardWindow.tsx:10](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L10)
 
 ___
 
@@ -88,13 +94,15 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:6](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L6)
+[CardWindow.tsx:12](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L12)
 
 ___
 
 ### Rect
 
 Ƭ **Rect**: `Object`
+
+These values ​​are `px`.
 
 #### Type declaration
 
@@ -105,7 +113,26 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:4](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L4)
+[CardWindow.tsx:6](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L6)
+
+___
+
+### Spacing
+
+Ƭ **Spacing**: `Object`
+
+These values ​​are `px`.
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `x` | `number` |
+| `y` | `number` |
+
+#### Defined in
+
+[CardWindow.tsx:8](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L8)
 
 ## Variables
 
@@ -115,7 +142,7 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:88](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L88)
+[CardWindow.tsx:168](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L168)
 
 ## Functions
 
@@ -135,4 +162,4 @@ ___
 
 #### Defined in
 
-[CardWindow.tsx:13](https://github.com/michiharu/card-window/blob/ff74e85/packages/card-window/src/CardWindow.tsx#L13)
+[CardWindow.tsx:35](https://github.com/michiharu/card-window/blob/6a91409/packages/card-window/src/CardWindow.tsx#L35)
