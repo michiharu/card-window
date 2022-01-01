@@ -1,13 +1,15 @@
-import { __local__ } from './CardWindow';
+import { functions } from './CardWindow';
 
 const {
   getColumns,
   // getScrollContainerStyle,
   getRenderRowRange,
   getRenderContainerStyle,
+  getPlaceholderCount,
+  range,
   // getRenderItemProps,
   // getNextOffset
-} = __local__;
+} = functions;
 
 describe('getColumns', () => {
   const height = 0;
@@ -71,5 +73,79 @@ describe('getRenderRowRange', () => {
     expect(getRenderRowRange(1000, 0, { width, height: 100 }, { width, height: 100 }, { x, y: 50 })).toEqual([6, 7]);
     // (100 + 50 * 2) / (100 + 50) + 1 = 3
     expect(getRenderRowRange(1000, 50, { width, height: 100 }, { width, height: 100 }, { x, y: 50 })).toEqual([6, 8]);
+  });
+});
+
+describe('getPlaceholderCount', () => {
+  test('inherit', () => {
+    const align = 'inherit';
+    expect(getPlaceholderCount(align, 97, 3, 100)).toBe(undefined);
+    expect(getPlaceholderCount(align, 98, 3, 100)).toBe(undefined);
+    expect(getPlaceholderCount(align, 99, 3, 100)).toBe(undefined);
+  });
+  describe('left', () => {
+    const align = 'left';
+    test('3 - 100 % 3 = 2', () => {
+      const length = 100;
+      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 99, 3, length)).toBe(2);
+    });
+    test('3 - 101 % 3 = 1', () => {
+      const length = 101;
+      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 99, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 100, 3, length)).toBe(1);
+    });
+    test('3 - 102 % 3 = 0', () => {
+      const length = 102;
+      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 99, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 100, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 101, 3, length)).toBe(undefined);
+    });
+  });
+
+  describe('right', () => {
+    const align = 'right';
+    test('3 - 100 % 3 = 2', () => {
+      const length = 100;
+      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 99, 3, length)).toBe(2);
+    });
+    test('3 - 101 % 3 = 1', () => {
+      const length = 101;
+      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 99, 3, length)).toBe(1);
+      expect(getPlaceholderCount(align, 100, 3, length)).toBe(undefined);
+    });
+    test('3 - 102 % 3 = 0', () => {
+      const length = 102;
+      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 99, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 100, 3, length)).toBe(undefined);
+      expect(getPlaceholderCount(align, 101, 3, length)).toBe(undefined);
+    });
+  });
+});
+
+describe('range', () => {
+  test('range(x)', () => {
+    expect(range(1)).toEqual([0]);
+    expect(range(2)).toEqual([0, 1]);
+    expect(range(3)).toEqual([0, 1, 2]);
+  });
+
+  test('range(x, y)', () => {
+    expect(range(0, 1)).toEqual([0]);
+    expect(range(0, 2)).toEqual([0, 1]);
+    expect(range(0, 3)).toEqual([0, 1, 2]);
+
+    expect(range(1, 1)).toEqual([]);
+    expect(range(1, 2)).toEqual([1]);
+    expect(range(1, 3)).toEqual([1, 2]);
   });
 });
