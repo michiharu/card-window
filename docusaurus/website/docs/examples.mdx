@@ -27,7 +27,7 @@ function App() {
 
 ### Sample Card
 
-The CardProps definition is [here](../api#cardprops).
+The CardProps definition is [here](./api/modules#cardprops).
 
 <Tabs>
 <TabItem value="js" label="JavaScript">
@@ -64,9 +64,9 @@ CardWindow has 3 required properties. Type parameter is `T extends any[]`.
 
 | Name       | Type                                          |
 | :--------- | :-------------------------------------------- |
-| `children` | [`CardComponent`](../api#cardcomponent)<`T`\> |
-| `cardRect` | [`Rect`](../api#rect)                         |
-| `data`     | `T`                                           |
+| `cardRect` | [`Rect`](./api/modules#rect) | - |
+| `children` | `React.ComponentType`<[`CardProps`](./api/modules#cardprops)<`T`\>\> | - |
+| `data` | `T` | `data` is an array. CardWindow passes data to `children` component. |
 
 ## Style
 

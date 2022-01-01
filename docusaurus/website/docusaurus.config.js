@@ -24,7 +24,6 @@ const config = {
       {
         entryPoints: ['../../packages/card-window/src/index.ts'],
         tsconfig: '../../packages/card-window/tsconfig.json',
-        watch: process.env.TYPEDOC_WATCH,
       },
     ],
   ],
