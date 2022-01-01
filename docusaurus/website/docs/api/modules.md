@@ -54,7 +54,7 @@ ___
 | `data` | `T` | `data` is an array. CardWindow passes data to `children` component. |
 | `innerStyle?` | `Omit`<`React.CSSProperties`, ``"position"`` \| ``"width"`` \| ``"height"``\> | - |
 | `justifyContent?` | [`JustifyContent`](modules#justifycontent) | - |
-| `lastRowAlign?` | `LastRowAlign` | - |
+| `lastRowAlign?` | [`LastRowAlign`](modules#lastrowalign) | - |
 | `loading?` | [`Loading`](modules#loading) | - |
 | `overScanPx?` | `number` | - |
 | `spacing?` | `Partial`<[`Spacing`](modules#spacing)\> | - |
@@ -76,6 +76,16 @@ JustifyContent only supports 6 values.
 #### Defined in
 
 [CardWindow.tsx:10](https://github.com/michiharu/card-window/blob/41138f3/packages/card-window/src/CardWindow.tsx#L10)
+
+___
+
+### LastRowAlign
+
+Ƭ **LastRowAlign**: ``"inherit"`` \| ``"left"`` \| ``"right"``
+
+#### Defined in
+
+[CardWindow.tsx:11](https://github.com/michiharu/card-window/blob/41138f3/packages/card-window/src/CardWindow.tsx#L11)
 
 ___
 

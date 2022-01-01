@@ -23,8 +23,8 @@ const config = {
       'docusaurus-plugin-typedoc',
       {
         entryPoints: ['../../packages/card-window/src/index.ts'],
-        out: '../doc-api',
         tsconfig: '../../packages/card-window/tsconfig.json',
+        watch: process.env.TYPEDOC_WATCH,
       },
     ],
   ],
@@ -35,9 +35,8 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          exclude: ['**/api/index.md'],
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
-          editUrl: 'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         blog: false,
         theme: {
