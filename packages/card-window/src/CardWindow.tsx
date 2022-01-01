@@ -1,14 +1,35 @@
 import * as React from 'react';
 
-export type CardProps<T extends Array<unknown>> = { data: T; index: number; style: React.CSSProperties };
-export type CardComponent<T extends Array<unknown>> = React.ComponentType<CardProps<T>>;
+/** CardWindow provides `children` component with this props. */
+export type CardProps<T extends Array<any>> = { data: T; index: number; style: React.CSSProperties };
+/** These values are `px`. */
 export type Rect = { width: number; height: number };
-export type JustifyContent = 'start' | 'center' | 'space-evenly' | 'space-around';
+/** These values are `px`. */
+export type Spacing = { x: number; y: number };
+/** JustifyContent only supports 6 values. */
+export type JustifyContent = 'left' | 'right' | 'center' | 'space-around' | 'space-between' | 'space-evenly';
+export type LastRowAlign = 'inherit' | 'left' | 'right';
 export type Loading = {
   type: 'card' | 'row';
   loadingRect: Rect;
   LoadingComponent: React.ReactNode;
   loadMoreItems: () => void;
+};
+
+export type CardWindowProps<T extends Array<any> = any[]> = {
+  /** `data` is an array. CardWindow passes data to `children` component. */
+  data: T;
+  cardRect: Rect;
+  children: React.ComponentType<CardProps<T>>;
+  getKey?: (index: number, data: T) => string;
+  overScanPx?: number;
+  spacing?: Partial<Spacing>;
+  className?: string;
+  style?: Omit<React.CSSProperties, 'overflow'>;
+  innerStyle?: Omit<React.CSSProperties, 'position' | 'width' | 'height'>;
+  justifyContent?: JustifyContent;
+  lastRowAlign?: LastRowAlign;
+  loading?: Loading;
 };
 
 export const useResizeObserver = (
@@ -31,100 +52,150 @@ export const useResizeObserver = (
   return [rect, ref];
 };
 
-const getScrollDivHeight = (cols: number, itemSize: number, card: Rect): number => {
-  if (cols === 0) return 0;
-  const rows = Math.ceil(itemSize / cols);
-  return rows * card.height;
+const getColumns = (container: Rect, card: Rect, spacing: Spacing): number => {
+  if (container.width < card.width) return 0;
+  return Math.floor((container.width + spacing.x) / (card.width + spacing.x));
 };
 
-const getCardStyle = (
-  index: number,
+const getScrollContainerStyle = (
   cols: number,
-  justifyContent: JustifyContent,
+  itemSize: number,
   card: Rect,
-  containerWidth: number
+  spacing: Spacing,
+  innerStyle: React.CSSProperties
 ): React.CSSProperties => {
-  const row = Math.floor(index / cols);
-  const col = index % cols;
-  const common: React.CSSProperties = { position: 'absolute', top: card.height * row, ...card };
-  switch (justifyContent) {
-    case 'start': {
-      const left = card.width * col;
-      return { ...common, left };
-    }
-    case 'center': {
-      const remain = containerWidth - card.width * cols;
-      const left = card.width * col + remain / 2;
-      return { ...common, left };
-    }
-    case 'space-evenly': {
-      const space = (containerWidth - card.width * cols) / (cols + 1);
-      const left = space + (card.width + space) * col;
-      return { ...common, left };
-    }
-    case 'space-around': {
-      const colWidth = containerWidth / cols;
-      const left = (colWidth - card.width) / 2 + colWidth * col;
-      return { ...common, left };
-    }
-    default:
-      throw new Error();
-  }
+  const rows = cols !== 0 ? Math.ceil(itemSize / cols) : 0;
+  const height = rows * card.height + (rows - 1) * spacing.y;
+  return { ...innerStyle, width: '100%', height };
+};
+
+const getRenderRowRange = (
+  offset: number,
+  overScanPx: number,
+  container: Rect,
+  card: Rect,
+  spacing: Spacing
+): [number, number] => {
+  const height = card.height + spacing.y;
+  const first = Math.max(0, Math.floor((offset - overScanPx) / height));
+  const rows = Math.ceil((container.height + overScanPx * 2 + spacing.y) / height);
+  return [first, first + rows];
+};
+
+const getRenderContainerStyle = (
+  row: number,
+  card: Rect,
+  spacing: Spacing,
+  justifyContent: JustifyContent
+): React.CSSProperties => {
+  const top = row * (card.height + spacing.y);
+  return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
+};
+
+const getPlaceholderCount = (align: LastRowAlign, index: number, cols: number, length: number): number | undefined => {
+  if (align === 'right' && index === length - (length % cols)) return cols - (length % cols);
+  if (align === 'left' && length % cols !== 0 && index === length - 1) return cols - (length % cols);
+  return undefined;
+};
+
+const range = (_start: number, _end?: number): number[] => {
+  const start = _end === undefined ? 0 : _start;
+  const end = _end ?? _start;
+  const list: number[] = [];
+  for (let i = start; i < end; i += 1) list.push(i);
+  return list;
+};
+
+const getMarginLeft = (
+  lastRowAlign: LastRowAlign,
+  justifyContent: JustifyContent,
+  { x }: Spacing,
+  index: number
+): number | undefined => {
+  if (lastRowAlign === 'inherit') throw new Error();
+  if (!['center', 'left', 'right'].includes(justifyContent)) return undefined;
+  if (lastRowAlign === 'left') return x;
+  // Margin left is not required for `align: right` and `index: 0` cases.
+  return index !== 0 ? x : undefined;
+};
+
+type PlaceholderRendererProps = {
+  count: number | undefined;
+  lastRowAlign: LastRowAlign;
+  justifyContent: JustifyContent;
+  card: Rect;
+  spacing: Spacing;
+};
+
+const PlaceholderRenderer: React.FC<PlaceholderRendererProps> = (props) => {
+  const { count = 0, lastRowAlign, justifyContent, card, spacing } = props;
+  if (count === 0) return null;
+  return (
+    <>
+      {range(count).map((i) => {
+        const marginLeft = getMarginLeft(lastRowAlign, justifyContent, spacing, i);
+        const style: React.CSSProperties = { ...card, marginLeft };
+        return <div key={i} style={style} />;
+      })}
+    </>
+  );
 };
 
 const getRenderItemProps = (
+  rows: [number, number],
   cols: number,
-  container: Rect,
+  length: number,
   card: Rect,
-  itemSize: number,
-  offset: number,
-  overScanPx: number,
-  justifyContent: JustifyContent
-): { index: number; style: React.CSSProperties }[] => {
+  { x }: Spacing,
+  justifyContent: JustifyContent,
+  lastRowAlign: LastRowAlign
+): { index: number; style: React.CSSProperties; placeholderCount?: number }[] => {
   if (cols === 0) return [];
-  const startIndex = Math.max(0, Math.floor((offset - overScanPx) / card.height) * cols);
-  const stopIndex = Math.min(itemSize - 1, Math.ceil((offset + container.height + overScanPx) / card.height) * cols);
-  const items: { index: number; style: React.CSSProperties }[] = [];
-  for (let index = startIndex; index <= stopIndex; index += 1) {
-    items.push({
-      index,
-      style: getCardStyle(index, cols, justifyContent, card, container.width),
-    });
+  const start = rows[0] * cols;
+  const stop = Math.min(rows[1] * cols, length);
+  const items: { index: number; style: React.CSSProperties; placeholderCount?: number }[] = [];
+  for (let index = start; index < stop; index += 1) {
+    const marginLeft = index % cols !== 0 && ['center', 'left', 'right'].includes(justifyContent) ? x : undefined;
+    const placeholderCount = getPlaceholderCount(lastRowAlign, index, cols, length);
+    items.push({ index, style: { ...card, marginLeft }, placeholderCount });
   }
-
   return items;
 };
 
-const getNextOffset = (offset: number, beforeCols: number, afterCols: number, cardHeight: number): number => {
-  const remainingOffset = cardHeight - (offset % cardHeight);
-  const beforeRow = Math.ceil(offset / cardHeight);
-  const afterRow = Math.round((beforeRow * beforeCols) / afterCols);
-  return afterRow * cardHeight - remainingOffset;
+const getNextOffset = (offset: number, before: number, after: number, card: Rect, spacing: Spacing): number => {
+  const height = card.height + spacing.y;
+  const remainingOffset = height - (offset % height);
+  const beforeRow = Math.ceil(offset / height);
+  const afterRow = Math.round((beforeRow * before) / after);
+  return afterRow * height - remainingOffset;
 };
 
-export type CardWindowProps<T extends Array<unknown> = unknown[]> = {
-  data: T;
-  cardRect: Rect;
-  children: CardComponent<T>;
-  getKey?: (index: number, data: T) => string;
-  style?: Omit<React.CSSProperties, 'overflow'>;
-  innerStyle?: Omit<React.CSSProperties, 'position' | 'width' | 'height'>;
-  overScanPx?: number;
-  justifyContent?: JustifyContent;
-  loading?: Loading;
+export const functions = {
+  getColumns,
+  getScrollContainerStyle,
+  getRenderRowRange,
+  getRenderContainerStyle,
+  getPlaceholderCount,
+  range,
+  getRenderItemProps,
+  getNextOffset,
 };
 
 const CardWindow: React.FC<CardWindowProps> = (props) => {
   const {
     data,
-    cardRect,
+    cardRect: card,
     children: Children,
     getKey = (index) => index,
+    overScanPx = 200,
+    spacing: spacingProp,
+    className = undefined,
     style = {},
     innerStyle = {},
-    overScanPx = 1000,
     justifyContent = 'space-evenly',
+    lastRowAlign = 'inherit',
   } = props;
+  const spacing: Spacing = { x: 8, y: 8, ...spacingProp };
   const [offset, setOffset] = React.useState(0);
   const [container, ref] = useResizeObserver();
 
@@ -134,26 +205,38 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   );
 
   const colsRef = React.useRef(0);
-  const cols = Math.floor(container.width / cardRect.width);
+  const cols = getColumns(container, card, spacing);
 
   React.useEffect(() => {
     if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
-      ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, cardRect.height);
+      ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card, spacing);
     }
     colsRef.current = cols;
   }, [cols]);
 
-  const rootStyle = { width: '100%', minWidth: cardRect.width, height: '100%', ...style, overflow: 'auto' };
-  const height = getScrollDivHeight(cols, data.length, cardRect);
-  const scrollStyle: React.CSSProperties = { ...innerStyle, position: 'relative', width: '100%', height };
-  const items = getRenderItemProps(cols, container, cardRect, data.length, offset, overScanPx, justifyContent);
+  const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...style, overflow: 'auto' };
+  const scrollContainerStyle = getScrollContainerStyle(cols, data.length, card, spacing, innerStyle);
+  const renderRows = getRenderRowRange(offset, overScanPx, container, card, spacing);
+  const renderContainerStyle = getRenderContainerStyle(renderRows[0], card, spacing, justifyContent);
+  const items = getRenderItemProps(renderRows, cols, data.length, card, spacing, justifyContent, lastRowAlign);
 
   return (
-    <div ref={ref} style={rootStyle} onScroll={handleScroll}>
-      <div style={scrollStyle}>
-        {items.map((item) => (
-          <Children key={getKey(item.index, data)} data={data} {...item} />
-        ))}
+    <div ref={ref} className={className} style={rootStyle} onScroll={handleScroll}>
+      <div style={scrollContainerStyle}>
+        <div style={renderContainerStyle}>
+          {items.map((item) => {
+            const count = item.placeholderCount;
+            const placeholderProps: PlaceholderRendererProps = { count, lastRowAlign, justifyContent, card, spacing };
+            return (
+              <React.Fragment key={getKey(item.index, data)}>
+                {item.index % cols === 0 && <div style={{ width: '100%', height: item.index !== 0 ? spacing.y : 0 }} />}
+                {lastRowAlign === 'right' && <PlaceholderRenderer {...placeholderProps} />}
+                <Children data={data} {...item} />
+                {lastRowAlign === 'left' && <PlaceholderRenderer {...placeholderProps} />}
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -15,6 +15,8 @@ module.exports = {
   rules: {
     'max-len': ['error', { code: 120 }],
 
+    '@typescript-eslint/no-explicit-any': 'off',
+
     'react/function-component-definition': [2, { namedComponents: 'arrow-function' }],
     'react/jsx-props-no-spreading': 'off',
     'react/require-default-props': 'off',
