@@ -5,6 +5,17 @@
   width: 100%;
 }
 
+.demo {
+  transition: all 1s;
+  width: 70%;
+  border-radius: var(--ifm-card-border-radius);
+  overflow: hidden;
+}
+
+.demo:hover {
+  width: 100%;
+}
+
 .featureSvg {
   height: 200px;
   width: 200px;
