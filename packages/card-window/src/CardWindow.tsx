@@ -64,7 +64,8 @@ const getScrollContainerStyle = (
   spacing: Spacing,
   innerStyle: React.CSSProperties
 ): React.CSSProperties => {
-  const rows = cols !== 0 ? Math.ceil(itemSize / cols) : 0;
+  if (cols === 0) return { ...innerStyle, width: '100%', height: 0 };
+  const rows = Math.ceil(itemSize / cols);
   const height = rows * card.height + (rows - 1) * spacing.y;
   return { ...innerStyle, width: '100%', height };
 };
@@ -88,7 +89,7 @@ const getRenderContainerStyle = (
   spacing: Spacing,
   justifyContent: JustifyContent
 ): React.CSSProperties => {
-  const top = row * (card.height + spacing.y);
+  const top = row === 0 ? 0 : row * card.height + (row - 1) * spacing.y;
   return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
 };
 
