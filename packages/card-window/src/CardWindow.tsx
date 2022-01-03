@@ -89,7 +89,7 @@ const getRenderContainerStyle = (
   spacing: Spacing,
   justifyContent: JustifyContent
 ): React.CSSProperties => {
-  const top = row === 0 ? 0 : row * card.height + (row - 1) * spacing.y;
+  const top = row * (card.height + spacing.y);
   return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
 };
 
@@ -225,12 +225,12 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     <div ref={ref} className={className} style={rootStyle} onScroll={handleScroll}>
       <div style={scrollContainerStyle}>
         <div style={renderContainerStyle}>
-          {items.map((item) => {
+          {items.map((item, i) => {
             const count = item.placeholderCount;
             const placeholderProps: PlaceholderRendererProps = { count, lastRowAlign, justifyContent, card, spacing };
             return (
               <React.Fragment key={getKey(item.index, data)}>
-                {item.index % cols === 0 && <div style={{ width: '100%', height: item.index !== 0 ? spacing.y : 0 }} />}
+                {i !== 0 && item.index % cols === 0 && <div style={{ width: '100%', height: spacing.y }} />}
                 {lastRowAlign === 'right' && <PlaceholderRenderer {...placeholderProps} />}
                 <Children data={data} {...item} />
                 {lastRowAlign === 'left' && <PlaceholderRenderer {...placeholderProps} />}
