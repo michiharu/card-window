@@ -56,7 +56,7 @@ const range = (_start: number, _end?: number): number[] => {
 const seed = (int: number) => Math.floor(Math.random() * int);
 
 function FeatureDemo({ title, image, description }: FeatureItem) {
-  const ref = React.useRef(range(29).map(() => seed(30)));
+  const ref = React.useRef(range(193).map(() => seed(30)));
   
   return (
     <div className={clsx('col col--4')}>
