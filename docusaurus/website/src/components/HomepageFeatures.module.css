@@ -7,7 +7,7 @@
 
 .demo {
   transition: all 1s;
-  width: 70%;
+  width: 75%;
   border-radius: var(--ifm-card-border-radius);
   overflow: hidden;
 }

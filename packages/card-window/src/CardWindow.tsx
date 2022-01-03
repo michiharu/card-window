@@ -5,7 +5,7 @@ export type CardProps<T extends Array<any>> = { data: T; index: number; style: R
 /** These values are `px`. */
 export type Rect = { width: number; height: number };
 /** These values are `px`. */
-export type Spacing = { x: number; y: number };
+export type Spacing = { x: number; y: number; top: number; bottom: number };
 /** JustifyContent only supports 6 values. */
 export type JustifyContent = 'left' | 'right' | 'center' | 'space-around' | 'space-between' | 'space-evenly';
 export type LastRowAlign = 'inherit' | 'left' | 'right';
@@ -61,12 +61,12 @@ const getScrollContainerStyle = (
   cols: number,
   itemSize: number,
   card: Rect,
-  spacing: Spacing,
+  { y, top, bottom }: Spacing,
   innerStyle: React.CSSProperties
 ): React.CSSProperties => {
   if (cols === 0) return { ...innerStyle, width: '100%', height: 0 };
   const rows = Math.ceil(itemSize / cols);
-  const height = rows * card.height + (rows - 1) * spacing.y;
+  const height = rows * card.height + (rows - 1) * y + top + bottom;
   return { ...innerStyle, width: '100%', height };
 };
 
@@ -75,11 +75,11 @@ const getRenderRowRange = (
   overScanPx: number,
   container: Rect,
   card: Rect,
-  spacing: Spacing
+  { y }: Spacing
 ): [number, number] => {
-  const height = card.height + spacing.y;
+  const height = card.height + y;
   const first = Math.max(0, Math.floor((offset - overScanPx) / height));
-  const rows = Math.ceil((container.height + overScanPx * 2 + spacing.y) / height);
+  const rows = Math.ceil((container.height + overScanPx * 2 + y) / height);
   return [first, first + rows];
 };
 
@@ -89,7 +89,7 @@ const getRenderContainerStyle = (
   spacing: Spacing,
   justifyContent: JustifyContent
 ): React.CSSProperties => {
-  const top = row * (card.height + spacing.y);
+  const top = row * (card.height + spacing.y) + spacing.top;
   return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
 };
 
@@ -182,6 +182,8 @@ export const functions = {
   getNextOffset,
 };
 
+const defaultSpace = 16;
+
 const CardWindow: React.FC<CardWindowProps> = (props) => {
   const {
     data,
@@ -196,7 +198,13 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     justifyContent = 'space-evenly',
     lastRowAlign = 'inherit',
   } = props;
-  const spacing: Spacing = { x: 8, y: 8, ...spacingProp };
+  const spacing: Spacing = {
+    x: defaultSpace,
+    y: defaultSpace,
+    top: defaultSpace,
+    bottom: defaultSpace,
+    ...spacingProp,
+  };
   const [offset, setOffset] = React.useState(0);
   const [container, ref] = useResizeObserver();
 
