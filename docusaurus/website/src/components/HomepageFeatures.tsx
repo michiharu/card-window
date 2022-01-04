@@ -54,6 +54,7 @@ const range = (_start: number, _end?: number): number[] => {
 };
 
 const seed = (int: number) => Math.floor(Math.random() * int);
+const cardSize = 80;
 
 function FeatureDemo({ title, description }: FeatureItem) {
   const ref = React.useRef(range(1001).map(() => seed(100)));
@@ -66,14 +67,14 @@ function FeatureDemo({ title, description }: FeatureItem) {
       >
         <CardWindow
           data={ref.current}
-          cardRect={{ width: 75, height: 75 }}
+          cardRect={{ width: cardSize, height: cardSize }}
           style={{ height: 160 }}
           innerStyle={{ background: 'linear-gradient(65deg, #F13F79, #2196f3)' }}
           lastRowAlign="left"
         >
           {({ data, index, style }) => (
             <div style={{...style, borderRadius: 'var(--ifm-card-border-radius)', overflow: 'hidden'}}>
-              <img alt="docusaurus" src={`https://picsum.photos/seed/${data[index]}/75/75`} />
+              <img alt="docusaurus" src={`https://picsum.photos/seed/${data[index]}/${cardSize}/${cardSize}`} />
             </div>
           )}
         </CardWindow>
