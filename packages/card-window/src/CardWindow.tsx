@@ -52,9 +52,10 @@ export const useResizeObserver = (
   return [rect, ref];
 };
 
-const getColumns = (container: Rect, card: Rect, spacing: Spacing): number => {
-  if (container.width < card.width) return 0;
-  return Math.floor((container.width + spacing.x) / (card.width + spacing.x));
+const getColumns = (container: Rect, { width }: Rect, { x }: Spacing, justifyContent: JustifyContent): number => {
+  if (container.width < width) return 0;
+  if (justifyContent === 'space-evenly') return Math.max(1, Math.floor((container.width - x) / (width + x)));
+  return Math.floor((container.width + x) / (width + x));
 };
 
 const getScrollContainerStyle = (
@@ -214,7 +215,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   );
 
   const colsRef = React.useRef(0);
-  const cols = getColumns(container, card, spacing);
+  const cols = getColumns(container, card, spacing, justifyContent);
 
   React.useEffect(() => {
     if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
