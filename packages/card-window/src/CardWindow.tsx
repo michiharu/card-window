@@ -183,7 +183,7 @@ export const functions = {
   getNextOffset,
 };
 
-const defaultSpace = 16;
+const defaultSpace = 8;
 
 const CardWindow: React.FC<CardWindowProps> = (props) => {
   const {

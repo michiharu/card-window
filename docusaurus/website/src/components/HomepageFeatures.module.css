@@ -6,8 +6,8 @@
 }
 
 .demo {
-  transition: all 1s;
-  width: 75%;
+  transition: all 2s;
+  width: 72%;
   border-radius: var(--ifm-card-border-radius);
   overflow: hidden;
 }
