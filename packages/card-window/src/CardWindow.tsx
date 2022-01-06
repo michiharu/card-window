@@ -130,6 +130,7 @@ const range = (_start: number, _end?: number): number[] => {
   for (let i = start; i < end; i += 1) list.push(i);
   return list;
 };
+
 const getBaseItemProps = (
   index: number,
   cols: number,
@@ -191,7 +192,7 @@ const getItemProps = (
   const stop = length + (loadingCard ? 1 : 0);
   return range(start, stop).map((index) => {
     const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
-    if (index !== stop - 1) return { type: 'card', index, ...base };
+    if (!loadingCard || index !== stop - 1) return { type: 'card', index, ...base };
     return { type: 'loading', ...base };
   });
 };
