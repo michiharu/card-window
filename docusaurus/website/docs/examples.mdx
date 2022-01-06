@@ -90,3 +90,22 @@ function App() {
   );
 }
 ```
+
+## Loading usage
+
+### Play ground
+
+```jsx live
+function App() {
+  const items = [...Array(100)].map((_, i) => i);
+  const cardRect = { width: 300, height: 200 };
+  const loading = { type: 'card', LoadingComponent, loadMore: () => alert('more!') }
+  return (
+    <div style={{ height: 300 }}>
+      <CardWindow data={items} cardRect={cardRect} loading={loading} >
+        {Card}
+      </CardWindow>
+    </div>
+  );
+}
+```
