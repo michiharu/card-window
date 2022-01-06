@@ -16,12 +16,21 @@ const Card = ({ index, style }) => (
   </div>
 );
 
+const LoadingComponent = ({ style }) => (
+  <div className="card" style={style}>
+    <div className="card__body">
+      <h2>Loading...</h2>
+    </div>
+  </div>
+);
+
 // Add react-live imports you need here
 const ReactLiveScope = {
   React,
   ...React,
   CardWindow,
   Card,
+  LoadingComponent,
 };
 
 export default ReactLiveScope;

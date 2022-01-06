@@ -5,12 +5,15 @@ import { Spacing } from '.';
 const {
   getColumns,
   // getScrollContainerStyle,
-  getRenderRowRange,
+  getRenderFirstRow,
+  getRenderRows,
+  getLastRow,
+  getRenderLastRow,
+  // getRenderRowRange,
   getRenderContainerStyle,
-  getPlaceholderCount,
   range,
-  // getRenderItemProps,
-  // getNextOffset
+  // getItemProps,
+  // getNextOffset,
 } = functions;
 
 describe('getColumns', () => {
@@ -74,82 +77,31 @@ describe('getRenderContainerStyle', () => {
   });
 });
 
-describe('getRenderRowRange', () => {
+describe('getRenderFirstRow', () => {
   const width = 0;
-  test('container.height: 100, card.height: 100, spacing.y: 0', () => {
-    const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
-    expect(getRenderRowRange(0, 0, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([0, 1]);
-    expect(getRenderRowRange(0, 1, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([0, 2]);
-    expect(getRenderRowRange(0, 50, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([0, 2]);
-    expect(getRenderRowRange(0, 51, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([0, 3]);
-    expect(getRenderRowRange(1000, 0, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([10, 11]);
-    expect(getRenderRowRange(1000, 1, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([9, 11]);
-    expect(getRenderRowRange(1000, 50, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([9, 11]);
-    expect(getRenderRowRange(1000, 51, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([9, 12]);
-  });
-  test('container.height: 100, card.height: 100, spacing.y: 50', () => {
-    const spacing: Spacing = { x: 0, y: 50, top: 0, bottom: 0 };
-    // 1000 / (100 + 50) = 6.66
-    expect(getRenderRowRange(1000, 0, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([6, 7]);
-    // (100 + 50 * 2) / (100 + 50) + 1 = 3
-    expect(getRenderRowRange(1000, 50, { width, height: 100 }, { width, height: 100 }, spacing)).toEqual([6, 8]);
+  const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
+  test('overScanPx: 0', () => {
+    expect(getRenderFirstRow(0, 0, { width, height: 100 }, { ...spacing, y: 0 })).toEqual(0);
   });
 });
 
-describe('getPlaceholderCount', () => {
-  test('inherit', () => {
-    const align = 'inherit';
-    expect(getPlaceholderCount(align, 97, 3, 100)).toBe(undefined);
-    expect(getPlaceholderCount(align, 98, 3, 100)).toBe(undefined);
-    expect(getPlaceholderCount(align, 99, 3, 100)).toBe(undefined);
+describe('getRenderRows', () => {
+  const width = 0;
+  const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
+  test('overScanPx: 0', () => {
+    expect(getRenderRows(0, { width, height: 100 }, { width, height: 100 }, { ...spacing, y: 0 })).toEqual(0);
   });
-  describe('left', () => {
-    const align = 'left';
-    test('3 - 100 % 3 = 2', () => {
-      const length = 100;
-      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 99, 3, length)).toBe(2);
-    });
-    test('3 - 101 % 3 = 1', () => {
-      const length = 101;
-      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 99, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 100, 3, length)).toBe(1);
-    });
-    test('3 - 102 % 3 = 0', () => {
-      const length = 102;
-      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 99, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 100, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 101, 3, length)).toBe(undefined);
-    });
-  });
+});
 
-  describe('right', () => {
-    const align = 'right';
-    test('3 - 100 % 3 = 2', () => {
-      const length = 100;
-      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 99, 3, length)).toBe(2);
-    });
-    test('3 - 101 % 3 = 1', () => {
-      const length = 101;
-      expect(getPlaceholderCount(align, 97, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 99, 3, length)).toBe(1);
-      expect(getPlaceholderCount(align, 100, 3, length)).toBe(undefined);
-    });
-    test('3 - 102 % 3 = 0', () => {
-      const length = 102;
-      expect(getPlaceholderCount(align, 98, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 99, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 100, 3, length)).toBe(undefined);
-      expect(getPlaceholderCount(align, 101, 3, length)).toBe(undefined);
-    });
+describe('getLastRow', () => {
+  test('loadingCard: false', () => {
+    const loadingCard = false;
+    expect(getLastRow(0, loadingCard, 3)).toEqual(0);
   });
+});
+
+test('getRenderLastRow', () => {
+  expect(getRenderLastRow(0, 3, 3)).toEqual(3);
 });
 
 describe('range', () => {
