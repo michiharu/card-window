@@ -4,7 +4,6 @@ import { Spacing } from '.';
 
 const {
   getColumns,
-  // getScrollContainerStyle,
   getRenderFirstRow,
   getRenderRows,
   getLastRow,
