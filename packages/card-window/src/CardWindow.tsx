@@ -80,10 +80,8 @@ const getScrollContainerHeight = (
   return rows * (card.height + y) + top + bottom + loading.height;
 };
 
-const getRenderFirstRow = (offset: number, overScanPx: number, card: Rect, { y }: Spacing): number => {
-  const height = card.height + y;
-  return Math.max(0, Math.floor((offset - overScanPx) / height));
-};
+const getRenderFirstRow = (offset: number, overScanPx: number, card: Rect, spacing: Spacing): number =>
+  Math.max(0, Math.floor((offset - overScanPx) / (card.height + spacing.y)));
 
 const getRenderRows = (overScanPx: number, container: Rect, card: Rect, { y }: Spacing): number => {
   const height = card.height + y;
@@ -189,7 +187,7 @@ const getItemProps = (
     });
   }
   const start = rows[0] * cols;
-  const stop = length + (loadingCard ? 1 : 0);
+  const stop = Math.min(length + (loadingCard ? 1 : 0), (rows[1] + 1) * cols);
   return range(start, stop).map((index) => {
     const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
     if (!loadingCard || index !== stop - 1) return { type: 'card', index, ...base };
