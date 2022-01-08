@@ -99,10 +99,10 @@ function App() {
 function App() {
   const items = [...Array(100)].map((_, i) => i);
   const cardRect = { width: 300, height: 200 };
-  const loading = { type: 'card', LoadingComponent, loadMore: () => alert('more!') }
+  const loading = { type: 'card', Component: LoadingComponent, loadMore: () => alert('more!') }
   return (
     <div style={{ height: 300 }}>
-      <CardWindow data={items} cardRect={cardRect} loading={loading} >
+      <CardWindow data={items} cardRect={cardRect} loading={loading} justifyContent="stretch" >
         {Card}
       </CardWindow>
     </div>

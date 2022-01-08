@@ -1,19 +1,42 @@
 import * as React from 'react';
 
 /** CardWindow provides `children` component with this props. */
-type ChildProps = { style: React.CSSProperties; row: number; col: number };
-export type CardProps<T extends any[] = any[]> = { data: T; index: number } & ChildProps;
+export type CardProps<T extends any[] = any[]> = {
+  data: T;
+  index: number;
+  style: React.CSSProperties;
+  row: number;
+  col: number;
+};
 /** These values are `px`. */
 export type Rect = { width: number; height: number };
 /** These values are `px`. */
 export type Spacing = { x: number; y: number; top: number; bottom: number };
-/** JustifyContent only supports 6 values. */
-export type JustifyContent = 'left' | 'right' | 'center' | 'space-around' | 'space-between' | 'space-evenly';
+/** JustifyContent only supports 7 values. */
+export type JustifyContent =
+  | 'left'
+  | 'right'
+  | 'center'
+  | 'space-around'
+  | 'space-between'
+  | 'space-evenly'
+  | 'stretch';
+const withPlaceholder: JustifyContent[] = ['center', 'left', 'right', 'stretch'];
 export type LastRowAlign = 'inherit' | 'left' | 'right';
-type LoadingCard = { type: 'card'; Component: React.ComponentType<ChildProps> };
-type LoadingRow = { type: 'row'; Component: React.ComponentType<{ style: React.CSSProperties }>; height: number };
-type LoadingType = LoadingCard | LoadingRow;
-export type Loading = LoadingType & { loadMore?: () => void };
+export type LoadingCardComponentProps = { style: React.CSSProperties; row: number; col: number };
+export type LoadingCard = {
+  type: 'card';
+  Component: React.ComponentType<LoadingCardComponentProps>;
+  loadMore?: () => void;
+};
+export type LoadingRowComponentProps = { style: React.CSSProperties };
+export type LoadingRow = {
+  type: 'row';
+  height: number;
+  Component: React.ComponentType<LoadingRowComponentProps>;
+  loadMore?: () => void;
+};
+export type Loading = LoadingCard | LoadingRow;
 
 export type CardWindowProps<T extends any[] = any[]> = {
   /** `data` is an array. CardWindow passes data to `children` component. */
@@ -128,23 +151,24 @@ const range = (_start: number, _end?: number): number[] => {
   for (let i = start; i < end; i += 1) list.push(i);
   return list;
 };
-
+type BaseItemProps = { style: React.CSSProperties; row: number; col: number };
 const getBaseItemProps = (
   index: number,
   cols: number,
   justifyContent: JustifyContent,
-  card: Rect,
+  { width, height }: Rect,
   { x }: Spacing
-): ChildProps => {
+): BaseItemProps => {
   const row = Math.floor(index / cols);
   const col = index % cols;
-  const marginLeft = col !== 0 && ['center', 'left', 'right'].includes(justifyContent) ? x : undefined;
-  const style = { ...card, marginLeft };
+  const marginLeft = col !== 0 && withPlaceholder.includes(justifyContent) ? x : undefined;
+  const widthObj: React.CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexGrow: 1 };
+  const style = { ...widthObj, height, marginLeft };
   return { style, row, col };
 };
 
-type PlaceholderTypeProps = { type: 'placeholder' } & ChildProps;
-type LoadingTypeProps = { type: 'loading' } & ChildProps;
+type PlaceholderTypeProps = { type: 'placeholder' } & BaseItemProps;
+type LoadingTypeProps = { type: 'loading' } & BaseItemProps;
 type ItemProps = ({ type: 'card' } & Omit<CardProps, 'data'>) | PlaceholderTypeProps | LoadingTypeProps;
 
 const getItemProps = (
@@ -230,7 +254,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     style = {},
     innerStyle = {},
     justifyContent = 'space-evenly',
-    lastRowAlign = 'inherit',
+    lastRowAlign = 'left',
     loading,
   } = props;
   const spacing: Spacing = {
@@ -258,12 +282,12 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const scrollContainerHeight = getScrollContainerHeight(cols, data.length, card, spacing, loading);
   const scrollContainerStyle = { ...innerStyle, width: '100%', height: scrollContainerHeight };
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
-    setOffset(e.currentTarget.scrollTop);
-    if (loading?.loadMore) {
+    if (loading?.loadMore && offset < e.currentTarget.scrollTop) {
       const loadingHeight = loading.type === 'card' ? card.height : loading.height;
       const threshold = scrollContainerHeight - container.height - loadingHeight;
       if (threshold < e.currentTarget.scrollTop) loading.loadMore();
     }
+    setOffset(e.currentTarget.scrollTop);
   };
   const renderRows = getRenderRowRange(offset, overScanPx, container, card, spacing, data.length, loadingCard, cols);
   const renderContainerStyle = getRenderContainerStyle(renderRows[0], card, spacing, justifyContent);
@@ -284,10 +308,9 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
             );
           })}
           {loading?.type === 'row' && (
-            <>
-              <div style={{ width: '100%', height: spacing.y }} />
+            <div style={{ width: '100%', paddingTop: spacing.y, display: 'flex', justifyContent: 'center' }}>
               <loading.Component style={{ height: loading.height }} />
-            </>
+            </div>
           )}
         </div>
       </div>
