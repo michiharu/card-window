@@ -2,17 +2,28 @@ import * as React from 'react';
 
 /** CardWindow provides `children` component with this props. */
 export type CardProps<T extends any[] = any[]> = {
+  /** `data` is an array. CardWindow passes data to the `children` component. */
   data: T;
+  /** `index` is the index of the data allocated to the `children` component. */
   index: number;
+  /** `style` should be passed to the root of the `children` component. */
   style: React.CSSProperties;
+  /** `row` is the rendered row. */
   row: number;
+  /** `col` is the rendered column. */
   col: number;
 };
+
 /** These values are `px`. */
 export type Rect = { width: number; height: number };
+
 /** These values are `px`. */
 export type Spacing = { x: number; y: number; top: number; bottom: number };
-/** JustifyContent only supports 7 values. */
+
+/**
+ * JustifyContent only supports 7 values.
+ * If the value is `stretch`, the style of `children` component has `{ flexBasis: 'auto' }`.
+ */
 export type JustifyContent =
   | 'left'
   | 'right'
@@ -21,36 +32,119 @@ export type JustifyContent =
   | 'space-between'
   | 'space-evenly'
   | 'stretch';
-const withPlaceholder: JustifyContent[] = ['center', 'left', 'right', 'stretch'];
-export type LastRowAlign = 'inherit' | 'left' | 'right';
-export type LoadingCardComponentProps = { style: React.CSSProperties; row: number; col: number };
-export type LoadingCard = {
-  type: 'card';
-  Component: React.ComponentType<LoadingCardComponentProps>;
-  loadMore?: () => void;
-};
-export type LoadingRowComponentProps = { style: React.CSSProperties };
-export type LoadingRow = {
-  type: 'row';
-  height: number;
-  Component: React.ComponentType<LoadingRowComponentProps>;
-  loadMore?: () => void;
-};
+
+/**
+ * `LastRowAlign` that defines how to align
+ * when the number of cards in the last row is less than the number of columns.
+ */
+export type LastRowAlign = 'left' | 'right' | 'inherit';
+
+/** There are two rendering types for the infinite loading feature. */
 export type Loading = LoadingCard | LoadingRow;
 
+/** CardWindow provides `LoadingCard.Component` with this props. */
+export type LoadingCardComponentProps = {
+  /** `style` should be passed to the root of `LoadingCard.Component`. */
+  style: React.CSSProperties;
+  /** `row` is the rendered row. */
+  row: number;
+  /** `col` is the rendered column. */
+  col: number;
+};
+
+/**
+ * LoadingCard(`type: 'card'`) displays the loading component after the last card.
+ * Missing description of function-type is [bug](https://github.com/tgreyuk/typedoc-plugin-markdown/issues/281).
+ * 
+ * #### Description of `loadMore`
+ * 
+ * `loadMore` is called when `Component` is rendered.
+ */
+export type LoadingCard = {
+  type: 'card';
+  /** `Component` is rendered after the last card. */
+  Component: React.ComponentType<LoadingCardComponentProps>;
+  /** `loadMore` is called when `Component` is rendered. */
+  loadMore?(): void;
+};
+
+/** CardWindow provides `LoadingRow.Component` with this props. */
+export type LoadingRowComponentProps = {
+  /** `style` should be passed to the root of `LoadingRow.Component`. */
+  style: React.CSSProperties;
+};
+
+/**
+ * LoadingRow(`type: 'row'`) displays the loading component in the center next to the last row.
+ * Missing description of function-type is [bug](https://github.com/tgreyuk/typedoc-plugin-markdown/issues/281).
+ *
+ * #### Description of `loadMore`
+ * 
+ * `loadMore` is called when `Component` is rendered.
+ */
+export type LoadingRow = {
+  type: 'row';
+  /** `height` is the height of `LoadingRow.Component`. */
+  height: number;
+  /** `Component` is rendered in the center next to the last row. */
+  Component: React.ComponentType<LoadingRowComponentProps>;
+  /** `loadMore` is called when `Component` is rendered. */
+  loadMore?(): void;
+};
+
+/**
+ * This props is for `CardWindow`.
+ * Missing description of function-type is [bug](https://github.com/tgreyuk/typedoc-plugin-markdown/issues/281).
+ *
+ * #### Description of `getKey`
+ * 
+ * If you can use an id instead of array index for [key](https://reactjs.org/docs/lists-and-keys.html#keys),
+ * define a `getKey` function.
+ */
 export type CardWindowProps<T extends any[] = any[]> = {
   /** `data` is an array. CardWindow passes data to `children` component. */
   data: T;
+
+  /** `cardRect` is used to calculate the rendering of `children` component. */
   cardRect: Rect;
+
+  /** `children` is a component that receives `CardProps<T>`. */
   children: React.ComponentType<CardProps<T>>;
-  getKey?: (index: number, data: T) => string;
+
+  /**
+   * If you can use an id instead of array index for [key](https://reactjs.org/docs/lists-and-keys.html#keys),
+   * define a `getKey` function.
+   */
+  getKey?(index: number, data: T): string;
+
+  /** The number of px to render outside of the visible area. By default, `CardWindow` overscans 200px. */
   overScanPx?: number;
+
+  /** These values are `px`. */
   spacing?: Partial<Spacing>;
+
+  /** `className` is passed to the root element of `CardWindow` */
   className?: string;
+
+  /** `style` is passed to the root element of `CardWindow`.  */
   style?: Omit<React.CSSProperties, 'overflow'>;
+
+  /** `innerStyle` is passed to the scrollable large container element of `CardWindow`.  */
   innerStyle?: Omit<React.CSSProperties, 'position' | 'width' | 'height'>;
+
+  /**
+   * JustifyContent only supports 7 values.
+   * If the value is `stretch`, the style of `children` component has `{ flexBasis: 'auto' }`.
+   */
   justifyContent?: JustifyContent;
+
+  /**
+   * `LastRowAlign` that defines how to align
+   * when the number of cards in the last row is less than the number of columns.
+   */
   lastRowAlign?: LastRowAlign;
+
+  /** `loading?` is a property for the infinite loading feature. */
   loading?: Loading;
 };
 
@@ -161,8 +255,8 @@ const getBaseItemProps = (
 ): BaseItemProps => {
   const row = Math.floor(index / cols);
   const col = index % cols;
-  const marginLeft = col !== 0 && withPlaceholder.includes(justifyContent) ? x : undefined;
-  const widthObj: React.CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexGrow: 1 };
+  const marginLeft = col !== 0 && ['center', 'left', 'right', 'stretch'].includes(justifyContent) ? x : undefined;
+  const widthObj: React.CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexBasis: 'auto' };
   const style = { ...widthObj, height, marginLeft };
   return { style, row, col };
 };
