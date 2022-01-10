@@ -1,15 +1,15 @@
 import { functions } from './CardWindow';
 
-import { Spacing } from '.';
+import { LoadingCard, LoadingRow, Rect, Spacing } from '.';
 
 const {
   getColumns,
+  getScrollContainerHeight,
   getRenderFirstRow,
   getRenderRows,
   getLastRow,
   getRenderLastRow,
   // getRenderRowRange,
-  getRenderContainerStyle,
   range,
   // getItemProps,
   // getNextOffset,
@@ -54,48 +54,85 @@ describe('getColumns', () => {
   });
 });
 
-describe('getRenderContainerStyle', () => {
-  const width = 0;
-  const x = 0;
-  const justifyContent = 'space-evenly';
-  test('row === 0, card.height: 100, spacing.y: 0', () => {
-    const style = getRenderContainerStyle(0, { width, height: 100 }, { x, y: 0, top: 10, bottom: 0 }, justifyContent);
-    expect(style.transform).toBe('translate(0, 10px)');
+describe('getScrollContainerHeight', () => {
+  const card: Rect = { width: 0, height: 100 };
+  const spacing: Spacing = { x: 0, y: 10, top: 10, bottom: 10 };
+  describe('!loading', () => {
+    const loading = undefined;
+    test('length: 0', () => expect(getScrollContainerHeight(3, 0, card, spacing, loading)).toBe(20));
+    test('length: 1', () => expect(getScrollContainerHeight(3, 1, card, spacing, loading)).toBe(120));
+    test('length: 2', () => expect(getScrollContainerHeight(3, 2, card, spacing, loading)).toBe(120));
+    test('length: 3', () => expect(getScrollContainerHeight(3, 3, card, spacing, loading)).toBe(120));
+    test('length: 4', () => expect(getScrollContainerHeight(3, 4, card, spacing, loading)).toBe(230));
   });
-  test('row === 0, card.height: 100, spacing.y: 10', () => {
-    const style = getRenderContainerStyle(0, { width, height: 100 }, { x, y: 10, top: 10, bottom: 0 }, justifyContent);
-    expect(style.transform).toBe('translate(0, 10px)');
+  describe(`loading.type: 'card'`, () => {
+    const loading: LoadingCard = { type: 'card', Component: () => null };
+    test('length: 0', () => expect(getScrollContainerHeight(3, 0, card, spacing, loading)).toBe(120));
+    test('length: 1', () => expect(getScrollContainerHeight(3, 1, card, spacing, loading)).toBe(120));
+    test('length: 2', () => expect(getScrollContainerHeight(3, 2, card, spacing, loading)).toBe(120));
+    test('length: 3', () => expect(getScrollContainerHeight(3, 3, card, spacing, loading)).toBe(230));
   });
-  test('row === 1, card.height: 100, spacing.y: 0', () => {
-    const style = getRenderContainerStyle(1, { width, height: 100 }, { x, y: 0, top: 10, bottom: 0 }, justifyContent);
-    expect(style.transform).toBe('translate(0, 110px)');
-  });
-  test('row === 1, card.height: 100, spacing.y: 10', () => {
-    const style = getRenderContainerStyle(1, { width, height: 100 }, { x, y: 10, top: 10, bottom: 0 }, justifyContent);
-    expect(style.transform).toBe('translate(0, 120px)');
+  describe(`loading.type: 'row'`, () => {
+    const loading: LoadingRow = { type: 'row', height: 50, Component: () => null };
+    test('length: 0', () => expect(getScrollContainerHeight(3, 0, card, spacing, loading)).toBe(70));
+    test('length: 1', () => expect(getScrollContainerHeight(3, 1, card, spacing, loading)).toBe(180));
+    test('length: 2', () => expect(getScrollContainerHeight(3, 2, card, spacing, loading)).toBe(180));
+    test('length: 3', () => expect(getScrollContainerHeight(3, 3, card, spacing, loading)).toBe(180));
+    test('length: 4', () => expect(getScrollContainerHeight(3, 4, card, spacing, loading)).toBe(290));
   });
 });
 
 describe('getRenderFirstRow', () => {
-  const width = 0;
-  const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
-  test('overScanPx: 0', () => {
-    expect(getRenderFirstRow(0, 0, { width, height: 100 }, { ...spacing, y: 0 })).toEqual(0);
-  });
+  const card: Rect = { width: 0, height: 100 };
+  const spacing: Spacing = { x: 0, y: 10, top: 10, bottom: 10 };
+  test.each`
+    offset | overScanPx | expected
+    ${0}   | ${0}       | ${0}
+    ${109} | ${0}       | ${0}
+    ${110} | ${0}       | ${1}
+    ${219} | ${0}       | ${1}
+    ${220} | ${0}       | ${2}
+    ${0}   | ${200}     | ${0}
+    ${309} | ${200}     | ${0}
+    ${310} | ${200}     | ${1}
+    ${419} | ${200}     | ${1}
+    ${420} | ${200}     | ${2}
+  `('offset: $offset, overScanPx: $overScanPx', ({ offset, overScanPx, expected }) =>
+    expect(getRenderFirstRow(offset, overScanPx, card, spacing)).toEqual(expected)
+  );
 });
 
 describe('getRenderRows', () => {
-  const width = 0;
-  const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
-  test('overScanPx: 0', () => {
-    expect(getRenderRows(0, { width, height: 100 }, { width, height: 100 }, { ...spacing, y: 0 })).toEqual(0);
-  });
+  const container: Rect = { width: 0, height: 300 };
+  const card: Rect = { width: 0, height: 100 };
+  const spacing: Spacing = { x: 0, y: 10, top: 10, bottom: 10 };
+  test('container.height: 300, overScanPx:   0', () => expect(getRenderRows(0, container, card, spacing)).toEqual(3));
+  test('container.height: 300, overScanPx: 200', () => expect(getRenderRows(200, container, card, spacing)).toEqual(7));
 });
 
 describe('getLastRow', () => {
-  test('loadingCard: false', () => {
+  describe('loadingCard: false', () => {
     const loadingCard = false;
-    expect(getLastRow(0, loadingCard, 3)).toEqual(0);
+    test.each`
+      length | expected
+      ${0}   | ${0}
+      ${1}   | ${0}
+      ${2}   | ${0}
+      ${3}   | ${0}
+      ${4}   | ${1}
+    `('length: $length', ({ length, expected }) => expect(getLastRow(length, 3, loadingCard)).toEqual(expected));
+  });
+
+  describe('loadingCard: true', () => {
+    const loadingCard = true;
+    test.each`
+      length | expected
+      ${0}   | ${0}
+      ${1}   | ${0}
+      ${2}   | ${0}
+      ${3}   | ${1}
+      ${4}   | ${1}
+    `('length: $length', ({ length, expected }) => expect(getLastRow(length, 3, loadingCard)).toEqual(expected));
   });
 });
 
