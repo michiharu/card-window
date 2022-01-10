@@ -1,12 +1,13 @@
 import * as React from 'react';
+import { CSSProperties, Fragment, RefObject, UIEventHandler, useEffect, useRef, useState } from 'react';
 
-/** CardWindow provides `children` component with this props. */
+/** CardWindow provides the `CardWindow.children` component with this props. */
 export type CardProps<T extends any[] = any[]> = {
-  /** `data` is an array. CardWindow passes data to the `children` component. */
+  /** `data` is an array. CardWindow passes data to the `CardWindow.children` component. */
   data: T;
-  /** `index` is the index of the data allocated to the `children` component. */
+  /** `index` is the index of the data allocated to the `CardWindow.children` component. */
   index: number;
-  /** `style` should be passed to the root of the `children` component. */
+  /** `style` should be passed to the root of the `CardWindow.children` component. */
   style: React.CSSProperties;
   /** `row` is the rendered row. */
   row: number;
@@ -22,7 +23,7 @@ export type Spacing = { x: number; y: number; top: number; bottom: number };
 
 /**
  * JustifyContent only supports 7 values.
- * If the value is `stretch`, the style of `children` component has `{ flexBasis: 'auto' }`.
+ * If the value is `stretch`, the `CardProps.style` has `{ flexBasis: 'auto' }`.
  */
 export type JustifyContent =
   | 'left'
@@ -55,16 +56,16 @@ export type LoadingCardComponentProps = {
 /**
  * LoadingCard(`type: 'card'`) displays the loading component after the last card.
  * Missing description of function-type is [bug](https://github.com/tgreyuk/typedoc-plugin-markdown/issues/281).
- * 
+ *
  * #### Description of `loadMore`
- * 
- * `loadMore` is called when `Component` is rendered.
+ *
+ * `loadMore` is called when `LoadingCard.Component` is rendered.
  */
 export type LoadingCard = {
   type: 'card';
-  /** `Component` is rendered after the last card. */
+  /** `LoadingCard.Component` is rendered after the last card. */
   Component: React.ComponentType<LoadingCardComponentProps>;
-  /** `loadMore` is called when `Component` is rendered. */
+  /** `loadMore` is called when `LoadingCard.Component` is rendered. */
   loadMore?(): void;
 };
 
@@ -79,33 +80,33 @@ export type LoadingRowComponentProps = {
  * Missing description of function-type is [bug](https://github.com/tgreyuk/typedoc-plugin-markdown/issues/281).
  *
  * #### Description of `loadMore`
- * 
- * `loadMore` is called when `Component` is rendered.
+ *
+ * `loadMore` is called when `LoadingRow.Component` is rendered.
  */
 export type LoadingRow = {
   type: 'row';
   /** `height` is the height of `LoadingRow.Component`. */
   height: number;
-  /** `Component` is rendered in the center next to the last row. */
+  /** `LoadingRow.Component` is rendered in the center next to the last row. */
   Component: React.ComponentType<LoadingRowComponentProps>;
-  /** `loadMore` is called when `Component` is rendered. */
+  /** `loadMore` is called when `LoadingRow.Component` is rendered. */
   loadMore?(): void;
 };
 
 /**
- * This props is for `CardWindow`.
+ * This props is for CardWindow.
  * Missing description of function-type is [bug](https://github.com/tgreyuk/typedoc-plugin-markdown/issues/281).
  *
  * #### Description of `getKey`
- * 
+ *
  * If you can use an id instead of array index for [key](https://reactjs.org/docs/lists-and-keys.html#keys),
  * define a `getKey` function.
  */
 export type CardWindowProps<T extends any[] = any[]> = {
-  /** `data` is an array. CardWindow passes data to `children` component. */
+  /** `data` is an array. CardWindow passes data to `CardWindow.children` component. */
   data: T;
 
-  /** `cardRect` is used to calculate the rendering of `children` component. */
+  /** `cardRect` is used to calculate the rendering of `CardWindow.children` component. */
   cardRect: Rect;
 
   /** `children` is a component that receives `CardProps<T>`. */
@@ -126,7 +127,7 @@ export type CardWindowProps<T extends any[] = any[]> = {
   /** `className` is passed to the root element of `CardWindow` */
   className?: string;
 
-  /** `style` is passed to the root element of `CardWindow`.  */
+  /** `style` is passed to the root element of `CardWindow`. */
   style?: Omit<React.CSSProperties, 'overflow'>;
 
   /** `innerStyle` is passed to the scrollable large container element of `CardWindow`.  */
@@ -134,7 +135,7 @@ export type CardWindowProps<T extends any[] = any[]> = {
 
   /**
    * JustifyContent only supports 7 values.
-   * If the value is `stretch`, the style of `children` component has `{ flexBasis: 'auto' }`.
+   * If the value is `stretch`, the `CardProps.style` has `{ flexBasis: 'auto' }`.
    */
   justifyContent?: JustifyContent;
 
@@ -148,24 +149,12 @@ export type CardWindowProps<T extends any[] = any[]> = {
   loading?: Loading;
 };
 
-export const useResizeObserver = (
-  initial: Rect = { width: 0, height: 0 }
-): [Rect, React.MutableRefObject<HTMLDivElement>] => {
-  const [rect, set] = React.useState<Rect>(initial);
-  const ref = React.useRef<HTMLDivElement>();
-  React.useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      set({ width, height });
-    });
-    if (ref.current) {
-      resizeObserver.observe(ref.current);
-      const { width, height } = ref.current.getBoundingClientRect();
-      set({ width, height });
-    }
-    return () => resizeObserver.disconnect();
-  }, []);
-  return [rect, ref];
+const range = (_start: number, _end?: number): number[] => {
+  const start = _end === undefined ? 0 : _start;
+  const end = _end ?? _start;
+  const list: number[] = [];
+  for (let i = start; i < end; i += 1) list.push(i);
+  return list;
 };
 
 const getColumns = (container: Rect, { width }: Rect, { x }: Spacing, justifyContent: JustifyContent): number => {
@@ -233,19 +222,12 @@ const getRenderContainerStyle = (
   card: Rect,
   spacing: Spacing,
   justifyContent: JustifyContent
-): React.CSSProperties => {
+): CSSProperties => {
   const top = row * (card.height + spacing.y) + spacing.top;
   return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
 };
 
-const range = (_start: number, _end?: number): number[] => {
-  const start = _end === undefined ? 0 : _start;
-  const end = _end ?? _start;
-  const list: number[] = [];
-  for (let i = start; i < end; i += 1) list.push(i);
-  return list;
-};
-type BaseItemProps = { style: React.CSSProperties; row: number; col: number };
+type BaseItemProps = { style: CSSProperties; row: number; col: number };
 const getBaseItemProps = (
   index: number,
   cols: number,
@@ -256,7 +238,7 @@ const getBaseItemProps = (
   const row = Math.floor(index / cols);
   const col = index % cols;
   const marginLeft = col !== 0 && ['center', 'left', 'right', 'stretch'].includes(justifyContent) ? x : undefined;
-  const widthObj: React.CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexBasis: 'auto' };
+  const widthObj: CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexBasis: 'auto' };
   const style = { ...widthObj, height, marginLeft };
   return { style, row, col };
 };
@@ -322,6 +304,7 @@ const getNextOffset = (offset: number, before: number, after: number, card: Rect
 };
 
 export const functions = {
+  range,
   getColumns,
   getRenderFirstRow,
   getRenderRows,
@@ -329,9 +312,53 @@ export const functions = {
   getRenderLastRow,
   getRenderRowRange,
   getRenderContainerStyle,
-  range,
   getItemProps,
   getNextOffset,
+};
+
+/**
+ * `useResizeObserver` is a custom Hook for monitoring the size of the element.
+ * 
+ * If you give the hook an initial value for the element size, the hook will return that element size if ref is null.
+ *
+ * ```tsx
+ * const initialSize = { width: 200, height: 100 };
+ * 
+ * export const Example: React.FC = () => {
+ *     const [{ width, height }, ref] = useResizeObserver<HTMLDivElement>();
+ *     
+ *     if (ref.current === null) {
+ *         console.log(`width: ${width}`); // 200 from initialSize
+ *         console.log(`height: ${height}`); // 100 from initialSize
+ *     } else {
+ *         console.log(`width: ${width}`); // actual element width
+ *         console.log(`height: ${height}`); // actual element height
+ *     }
+ *
+ *     return (
+ *         <div ref={ref}>
+ *             ...
+ *         </div>
+ *     )
+ * }
+ * ```
+ */
+export const useResizeObserver = <T extends Element>(initial = { width: 0, height: 0 }): [Rect, RefObject<T>] => {
+  const [rect, set] = useState<Rect>(initial);
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      set({ width, height });
+    });
+    if (ref.current) {
+      resizeObserver.observe(ref.current);
+      const { width, height } = ref.current.getBoundingClientRect();
+      set({ width, height });
+    }
+    return () => resizeObserver.disconnect();
+  }, []);
+  return [rect, ref];
 };
 
 const defaultSpace = 8;
@@ -359,12 +386,12 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     ...spacingProp,
   };
 
-  const [offset, setOffset] = React.useState(0);
-  const [container, ref] = useResizeObserver();
-  const colsRef = React.useRef(0);
+  const [offset, setOffset] = useState(0);
+  const [container, ref] = useResizeObserver<HTMLDivElement>();
+  const colsRef = useRef(0);
   const cols = getColumns(container, card, spacing, justifyContent);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
       ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card, spacing);
     }
@@ -375,7 +402,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...style, overflow: 'auto' };
   const scrollContainerHeight = getScrollContainerHeight(cols, data.length, card, spacing, loading);
   const scrollContainerStyle = { ...innerStyle, width: '100%', height: scrollContainerHeight };
-  const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
+  const handleScroll: UIEventHandler<HTMLDivElement> = (e) => {
     if (loading?.loadMore && offset < e.currentTarget.scrollTop) {
       const loadingHeight = loading.type === 'card' ? card.height : loading.height;
       const threshold = scrollContainerHeight - container.height - loadingHeight;
@@ -393,12 +420,12 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
           {items.map((item, i) => {
             const key = item.type === 'card' ? getKey(item.index, data) : `col:${item.col}`;
             return (
-              <React.Fragment key={key}>
+              <Fragment key={key}>
                 {i !== 0 && item.col === 0 && <div style={{ width: '100%', height: spacing.y }} />}
                 {item.type === 'card' && <Children data={data} {...item} />}
                 {item.type === 'placeholder' && <div style={item.style} />}
                 {item.type === 'loading' && loading?.type === 'card' && <loading.Component {...item} />}
-              </React.Fragment>
+              </Fragment>
             );
           })}
           {loading?.type === 'row' && (
