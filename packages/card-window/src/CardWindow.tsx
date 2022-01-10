@@ -173,17 +173,19 @@ const getScrollContainerHeight = (
   if (cols === 0) return 0;
   const { y, top, bottom } = spacing;
   if (!loading) {
+    if (length === 0) return top + bottom;
     const rows = Math.ceil(length / cols);
-    return rows * (card.height + y) - y + top + bottom;
+    return top + rows * (card.height + y) - y + bottom;
   }
   // loading: card
   if (loading.type === 'card') {
     const rows = Math.ceil((length + 1) / cols);
-    return rows * (card.height + y) - y + top + bottom;
+    return top + rows * (card.height + y) - y + bottom;
   }
   // loading: row
-  const rows = Math.ceil(length / cols);
-  return rows * (card.height + y) + top + bottom + loading.height;
+    if (length === 0) return top + loading.height + bottom;
+    const rows = Math.ceil(length / cols);
+  return top + rows * (card.height + y) - y + y + loading.height + bottom;
 };
 
 const getRenderFirstRow = (offset: number, overScanPx: number, card: Rect, spacing: Spacing): number =>
@@ -194,8 +196,10 @@ const getRenderRows = (overScanPx: number, container: Rect, card: Rect, { y }: S
   return Math.ceil((container.height + overScanPx * 2 + y) / height);
 };
 
-const getLastRow = (length: number, loadingCard: boolean, cols: number): number =>
-  Math.floor((length + (loadingCard ? 1 : 0)) / cols);
+const getLastRow = (length: number, cols: number, loadingCard: boolean): number => {
+  if (length === 0) return 0;
+  return Math.ceil((length + (loadingCard ? 1 : 0)) / cols) - 1;
+}
 
 const getRenderLastRow = (renderFirst: number, rows: number, last: number): number =>
   Math.min(renderFirst + rows, last);
@@ -212,7 +216,7 @@ const getRenderRowRange = (
 ): [number, number] => {
   const renderFirst = getRenderFirstRow(offset, overScanPx, card, spacing);
   const rows = getRenderRows(overScanPx, container, card, spacing);
-  const last = getLastRow(length, loadingCard, cols);
+  const last = getLastRow(length, cols, loadingCard);
   const renderLast = getRenderLastRow(renderFirst, rows, last);
   return [renderFirst, renderLast];
 };
@@ -264,8 +268,8 @@ const getItemProps = (
     const lastRowCardCount = length % cols;
     return range(start, stop).map((index) => {
       const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
-      const isLastRow = getLastRow(length, loadingCard, cols) === base.row;
-      if (!isLastRow) return { type: 'card', index, ...base };
+      const isLastRow = getLastRow(length, cols, loadingCard) === base.row;
+      if (!isLastRow || lastRowCardCount === 0) return { type: 'card', index, ...base };
       if (base.col < lastRowCardCount) return { type: 'card', index, ...base };
       if (loadingCard && base.col === lastRowCardCount) return { type: 'loading', ...base };
       return { type: 'placeholder', ...base };
@@ -278,7 +282,7 @@ const getItemProps = (
     const placeholderCount = cols - lastRowCardCount - (loadingCard ? 1 : 0);
     return range(start, stop).map((index) => {
       const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
-      const isLastRow = getLastRow(length, loadingCard, cols) === base.row;
+      const isLastRow = getLastRow(length, cols, loadingCard) === base.row;
       if (!isLastRow) return { type: 'card', index, ...base };
       if (base.col < placeholderCount) return { type: 'placeholder', ...base };
       if (base.col < placeholderCount + lastRowCardCount)
@@ -306,6 +310,7 @@ const getNextOffset = (offset: number, before: number, after: number, card: Rect
 export const functions = {
   range,
   getColumns,
+  getScrollContainerHeight,
   getRenderFirstRow,
   getRenderRows,
   getLastRow,
