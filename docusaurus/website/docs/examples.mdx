@@ -7,103 +7,145 @@ import TabItem from '@theme/TabItem';
 
 # Examples
 
+Examples use:
+
+- [`SampleCard`](../docs/example-utils#sample-card)
+- [`Navbar`](../docs/example-utils#navbar)
+- [`useDropdown`](../docs/example-utils#usedropdown)
+
 ## Minimal usage
 
-### Play ground
+Cardwindow works by only rendering part of a large data set (just enough to fill the viewport).
+This helps address some common performance bottlenecks:
+
+- It reduces the amount of work (and time) required to render the initial view and to process updates.
+- It reduces the memory footprint by avoiding over-allocation of DOM nodes.
 
 ```jsx live
 function App() {
-  const items = [...Array(100)].map((_, i) => i);
-  const cardRect = { width: 300, height: 200 };
+  const data = range(10000);
+  const cardRect = { width: 200, height: 120 };
   return (
     <div style={{ height: 300 }}>
-      <CardWindow data={items} cardRect={cardRect}>
-        {Card}
+      <CardWindow data={data} cardRect={cardRect}>
+        {SampleCard}
       </CardWindow>
     </div>
   );
 }
 ```
 
-### Sample Card
-
-The CardProps definition is [here](./api/modules#cardprops).
-
-<Tabs>
-<TabItem value="js" label="JavaScript">
-
-```jsx
-const Card = ({ data, index, style }) => (
-  <div className="card" style={{ ...style }}>
-    <div className="card__body">
-      <h2>{data[index]}</h2>
-    </div>
-  </div>
-);
-```
-
-</TabItem>
-<TabItem value="py" label="TypeScript">
-
-```tsx
-const Card: React.FC<CardProps> = ({ data, index, style }) => (
-  <div className="card" style={{ ...style }}>
-    <div className="card__body">
-      <h2>{data[index]}</h2>
-    </div>
-  </div>
-);
-```
-
-</TabItem>
-</Tabs>
-
 ### Required properties
 
 CardWindow has 3 required properties. Type parameter is `T extends any[]`.
 
-| Name       | Type                                          |
-| :--------- | :-------------------------------------------- |
-| `cardRect` | [`Rect`](./api/modules#rect) | - |
-| `children` | `React.ComponentType`<[`CardProps`](./api/modules#cardprops)<`T`\>\> | - |
-| `data` | `T` | `data` is an array. CardWindow passes data to `children` component. |
+| Name       | Type                                                                 |
+| :--------- | :------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `cardRect` | [`Rect`](./api/modules#rect)                                         | `cardRect` is used to calculate the rendering of `CardWindow.children` component. |
+| `children` | `React.ComponentType`<[`CardProps`](./api/modules#cardprops)<`T`\>\> | `children` is a component that receives `CardProps<T>`.                           |
+| `data`     | `T`                                                                  | `data` is an array. CardWindow passes data to `CardWindow.children` component.    |
 
-## Style
+## Styling
 
-By default, CardWindow has the style `{ width: '100%', height: '100%' }`. These styles can be overridden.
+### `root`
+
+`root` is passed to the root element of CardWindow. By default, `root.style` has these attributes:
+
+- width: `100%`
+- height: `100%`
+- minWidth: `cardRect.width`
+- overflow: `auto`
+
+You can't override only `{ overflow: 'auto' }`.
 
 ```jsx live
 function App() {
-  const items = [...Array(1000)].map((_, i) => i);
-  const cardRect = { width: 300, height: 200 };
-  const style = { height: 400 };
+  const data = range(100);
+  const cardRect = { width: 200, height: 120 };
+  const root = { style: { height: 300, border: '10px dashed #2196f3' } };
   return (
-    <CardWindow data={items} cardRect={cardRect} style={style}>
-      {({ index, style }) => (
-        <div className="card" style={{ ...style, height: style.height - 16 }}>
-          <div style={{ padding: 16 }}>
-            <h2>{index}</h2>
-          </div>
-        </div>
-      )}
+    <CardWindow data={data} cardRect={cardRect} root={root}>
+      {SampleCard}
     </CardWindow>
+  );
+}
+```
+
+### `container`
+
+`container` is passed to the scrollable large container element. You can't override `width` and `height`.
+
+```jsx live
+function App() {
+  const data = range(100);
+  const cardRect = { width: 200, height: 120 };
+  const container = { style: { background: 'linear-gradient(65deg, #F13F79, #2196f3)' } };
+  return (
+    <div style={{ height: 300 }}>
+      <CardWindow data={data} cardRect={cardRect} container={container}>
+        {SampleCard}
+      </CardWindow>
+    </div>
+  );
+}
+```
+
+## Card alignment
+
+For card alignment, you can use `justifyContent` and `lastRowAlign`.
+
+```jsx live
+function App() {
+  const [justifyContent, JustifyContentDropdown] = useDropdown(
+    'justifyContent',
+    ['left', 'right', 'center', 'space-around', 'space-between', 'space-evenly', 'stretch'],
+    5
+  );
+  const [lastRowAlign, LastRowAlignDropdown] = useDropdown('lastRowAlign', ['left', 'right', 'inherit'], 0);
+  const data = range(10);
+  const cardRect = { width: 200, height: 120 };
+  const props = { data, cardRect, justifyContent, lastRowAlign };
+  return (
+    <div>
+      <Navbar>
+        {JustifyContentDropdown}
+        {LastRowAlignDropdown}
+      </Navbar>
+      <div style={{ height: 300 }}>
+        <CardWindow {...props}>{SampleCard}</CardWindow>
+      </div>
+    </div>
   );
 }
 ```
 
 ## Loading usage
 
-### Play ground
-
 ```jsx live
 function App() {
-  const items = [...Array(100)].map((_, i) => i);
-  const cardRect = { width: 300, height: 200 };
-  const loading = { type: 'card', Component: LoadingComponent, loadMore: () => alert('more!') }
+  const [{ data, pending }, set] = React.useState({ data: range(10), pending: false });
+
+  React.useEffect(() => {
+    let timer = undefined;
+    if (pending) {
+      timer = window.setTimeout(() => {
+        console.log('load!');
+        set((state) => ({ data: range(state.data.length + 10), pending: false }));
+      }, 2000);
+    }
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [pending]);
+
+  const cardRect = { width: 200, height: 120 };
+  const next = data.length < 30;
+  const loadMore = (!pending && next) ? () => set({ data, pending: true }) : undefined;
+  const loading = next ? { type: 'card', Component: LoadingComponent, loadMore } : undefined;
   return (
     <div style={{ height: 300 }}>
-      <CardWindow data={items} cardRect={cardRect} loading={loading} justifyContent="stretch" >
-        {Card}
+      <CardWindow data={data} cardRect={cardRect} loading={loading}>
+        {SampleCard}
       </CardWindow>
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './HomepageFeatures.module.css';
-import { CardWindow } from 'card-window';
+import { CardWindow, range } from 'card-window';
 
 type FeatureItem = {
   title: string;
@@ -45,35 +45,24 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-const range = (_start: number, _end?: number): number[] => {
-  const start = _end === undefined ? 0 : _start;
-  const end = _end ?? _start;
-  const list: number[] = [];
-  for (let i = start; i < end; i += 1) list.push(i);
-  return list;
-};
-
 const seed = (int: number) => Math.floor(Math.random() * int);
 const cardSize = 80;
 
 function FeatureDemo({ title, description }: FeatureItem) {
   const ref = React.useRef(range(1001).map(() => seed(100)));
-  
+
   return (
     <div className={clsx('col col--4')}>
-      <div
-        className={styles.demo}
-        style={{ marginTop: 20, marginBottom: 20, marginLeft: 'auto', marginRight: 'auto' }}
-      >
+      <div className={styles.demo} style={{ marginTop: 20, marginBottom: 20, marginLeft: 'auto', marginRight: 'auto' }}>
         <CardWindow
           data={ref.current}
           cardRect={{ width: cardSize, height: cardSize }}
-          style={{ height: 160 }}
-          innerStyle={{ background: 'linear-gradient(65deg, #F13F79, #2196f3)' }}
+          root={{ style: { height: 160 } }}
+          container={{ style: { background: 'linear-gradient(65deg, #F13F79, #2196f3)' } }}
           lastRowAlign="left"
         >
           {({ data, index, style }) => (
-            <div style={{...style, borderRadius: 'var(--ifm-card-border-radius)', overflow: 'hidden'}}>
+            <div style={{ ...style, borderRadius: 'var(--ifm-card-border-radius)', overflow: 'hidden' }}>
               <img alt="docusaurus" src={`https://picsum.photos/seed/${data[index]}/${cardSize}/${cardSize}`} />
             </div>
           )}

@@ -10,6 +10,7 @@ export {
   LoadingCardComponentProps,
   LoadingRow,
   LoadingRowComponentProps,
+  range,
   useResizeObserver,
   CardWindowProps,
 } from './CardWindow';
