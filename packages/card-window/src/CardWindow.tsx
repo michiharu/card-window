@@ -124,14 +124,19 @@ export type CardWindowProps<T extends any[] = any[]> = {
   /** These values are `px`. */
   spacing?: Partial<Spacing>;
 
-  /** `className` is passed to the root element of `CardWindow` */
-  className?: string;
+  root?: {
+    /** `root.className` are passed to the root element of `CardWindow`. */
+    className?: string;
+    /** `root.style` are passed to the root element of `CardWindow`. */
+    style?: Omit<React.CSSProperties, 'overflow'>;
+  };
 
-  /** `style` is passed to the root element of `CardWindow`. */
-  style?: Omit<React.CSSProperties, 'overflow'>;
-
-  /** `innerStyle` is passed to the scrollable large container element of `CardWindow`.  */
-  innerStyle?: Omit<React.CSSProperties, 'position' | 'width' | 'height'>;
+  container?: {
+    /** `container.className` are passed to the scrollable large container element. */
+    className?: string;
+    /** `container.style` are passed to the scrollable large container element. */
+    style?: Omit<React.CSSProperties, 'width' | 'height'>;
+  };
 
   /**
    * JustifyContent only supports 7 values.
@@ -149,7 +154,7 @@ export type CardWindowProps<T extends any[] = any[]> = {
   loading?: Loading;
 };
 
-const range = (_start: number, _end?: number): number[] => {
+export const range = (_start: number, _end?: number): number[] => {
   const start = _end === undefined ? 0 : _start;
   const end = _end ?? _start;
   const list: number[] = [];
@@ -183,8 +188,8 @@ const getScrollContainerHeight = (
     return top + rows * (card.height + y) - y + bottom;
   }
   // loading: row
-    if (length === 0) return top + loading.height + bottom;
-    const rows = Math.ceil(length / cols);
+  if (length === 0) return top + loading.height + bottom;
+  const rows = Math.ceil(length / cols);
   return top + rows * (card.height + y) - y + y + loading.height + bottom;
 };
 
@@ -199,7 +204,7 @@ const getRenderRows = (overScanPx: number, container: Rect, card: Rect, { y }: S
 const getLastRow = (length: number, cols: number, loadingCard: boolean): number => {
   if (length === 0) return 0;
   return Math.ceil((length + (loadingCard ? 1 : 0)) / cols) - 1;
-}
+};
 
 const getRenderLastRow = (renderFirst: number, rows: number, last: number): number =>
   Math.min(renderFirst + rows, last);
@@ -242,7 +247,7 @@ const getBaseItemProps = (
   const row = Math.floor(index / cols);
   const col = index % cols;
   const marginLeft = col !== 0 && ['center', 'left', 'right', 'stretch'].includes(justifyContent) ? x : undefined;
-  const widthObj: CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexBasis: 'auto' };
+  const widthObj: CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexGrow: 1 };
   const style = { ...widthObj, height, marginLeft };
   return { style, row, col };
 };
@@ -262,14 +267,16 @@ const getItemProps = (
   loadingCard: boolean
 ): ItemProps[] => {
   if (cols === 0) return [];
+  if (length === 0 && !loadingCard) return [];
   if (lastRowAlign === 'left') {
     const start = rows[0] * cols;
     const stop = (rows[1] + 1) * cols;
     const lastRowCardCount = length % cols;
+    const placeholderCount = cols - lastRowCardCount - (loadingCard ? 1 : 0);
     return range(start, stop).map((index) => {
       const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
       const isLastRow = getLastRow(length, cols, loadingCard) === base.row;
-      if (!isLastRow || lastRowCardCount === 0) return { type: 'card', index, ...base };
+      if (!isLastRow || placeholderCount === cols) return { type: 'card', index, ...base };
       if (base.col < lastRowCardCount) return { type: 'card', index, ...base };
       if (loadingCard && base.col === lastRowCardCount) return { type: 'loading', ...base };
       return { type: 'placeholder', ...base };
@@ -323,15 +330,15 @@ export const functions = {
 
 /**
  * `useResizeObserver` is a custom Hook for monitoring the size of the element.
- * 
+ *
  * If you give the hook an initial value for the element size, the hook will return that element size if ref is null.
  *
  * ```tsx
  * const initialSize = { width: 200, height: 100 };
- * 
+ *
  * export const Example: React.FC = () => {
  *     const [{ width, height }, ref] = useResizeObserver<HTMLDivElement>();
- *     
+ *
  *     if (ref.current === null) {
  *         console.log(`width: ${width}`); // 200 from initialSize
  *         console.log(`height: ${height}`); // 100 from initialSize
@@ -366,7 +373,7 @@ export const useResizeObserver = <T extends Element>(initial = { width: 0, heigh
   return [rect, ref];
 };
 
-const defaultSpace = 8;
+const defaultSpacing = { x: 8, y: 8, top: 8, bottom: 8 };
 
 const CardWindow: React.FC<CardWindowProps> = (props) => {
   const {
@@ -376,25 +383,19 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     getKey = (index) => index,
     overScanPx = 200,
     spacing: spacingProp,
-    className = undefined,
-    style = {},
-    innerStyle = {},
+    root = {},
+    container = {},
     justifyContent = 'space-evenly',
     lastRowAlign = 'left',
     loading,
   } = props;
-  const spacing: Spacing = {
-    x: defaultSpace,
-    y: defaultSpace,
-    top: defaultSpace,
-    bottom: defaultSpace,
-    ...spacingProp,
-  };
 
+  const spacing: Spacing = { ...defaultSpacing, ...spacingProp};
   const [offset, setOffset] = useState(0);
-  const [container, ref] = useResizeObserver<HTMLDivElement>();
+  const [rootRect, ref] = useResizeObserver<HTMLDivElement>();
   const colsRef = useRef(0);
-  const cols = getColumns(container, card, spacing, justifyContent);
+  const cols = getColumns(rootRect, card, spacing, justifyContent);
+  const scrollContainerHeight = getScrollContainerHeight(cols, data.length, card, spacing, loading);
 
   useEffect(() => {
     if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
@@ -403,24 +404,24 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     colsRef.current = cols;
   }, [cols]);
 
-  const loadingCard: boolean = loading?.type === 'card';
-  const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...style, overflow: 'auto' };
-  const scrollContainerHeight = getScrollContainerHeight(cols, data.length, card, spacing, loading);
-  const scrollContainerStyle = { ...innerStyle, width: '100%', height: scrollContainerHeight };
-  const handleScroll: UIEventHandler<HTMLDivElement> = (e) => {
-    if (loading?.loadMore && offset < e.currentTarget.scrollTop) {
+  useEffect(() => {
+    if (loading?.loadMore) {
       const loadingHeight = loading.type === 'card' ? card.height : loading.height;
-      const threshold = scrollContainerHeight - container.height - loadingHeight;
-      if (threshold < e.currentTarget.scrollTop) loading.loadMore();
+      const threshold = scrollContainerHeight - rootRect.height - loadingHeight;
+      if (scrollContainerHeight !== 0 && threshold < offset) loading.loadMore();
     }
-    setOffset(e.currentTarget.scrollTop);
-  };
-  const renderRows = getRenderRowRange(offset, overScanPx, container, card, spacing, data.length, loadingCard, cols);
+  }, [scrollContainerHeight, offset, loading?.loadMore]);
+
+  const loadingCard: boolean = loading?.type === 'card';
+  const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...root.style, overflow: 'auto' };
+  const scrollContainerStyle = { ...container.style, width: '100%', height: scrollContainerHeight };
+  const handleScroll: UIEventHandler<HTMLDivElement> = (e) => setOffset(e.currentTarget.scrollTop);
+  const renderRows = getRenderRowRange(offset, overScanPx, rootRect, card, spacing, data.length, loadingCard, cols);
   const renderContainerStyle = getRenderContainerStyle(renderRows[0], card, spacing, justifyContent);
   const items = getItemProps(renderRows, cols, data.length, card, spacing, justifyContent, lastRowAlign, loadingCard);
   return (
-    <div ref={ref} className={className} style={rootStyle} onScroll={handleScroll}>
-      <div style={scrollContainerStyle}>
+    <div ref={ref} className={root.className} style={rootStyle} onScroll={handleScroll}>
+      <div className={container.className} style={scrollContainerStyle}>
         <div style={renderContainerStyle}>
           {items.map((item, i) => {
             const key = item.type === 'card' ? getKey(item.index, data) : `col:${item.col}`;
