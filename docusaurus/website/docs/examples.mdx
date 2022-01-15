@@ -90,9 +90,9 @@ function App() {
 }
 ```
 
-## Card alignment
+## Card Position
 
-For card alignment, you can use `justifyContent` and `lastRowAlign`.
+For card position, you can use `justifyContent`, `lastRowAlign` and `spacing`.
 
 ```jsx live
 function App() {
@@ -102,16 +102,29 @@ function App() {
     5
   );
   const [lastRowAlign, LastRowAlignDropdown] = useDropdown('lastRowAlign', ['left', 'right', 'inherit'], 0);
+  const spaceList = [0, 4, 8, 20, 50, 100];
+  const [top, TopDropdown] = useDropdown('top', spaceList, 2);
+  const [bottom, BottomDropdown] = useDropdown('bottom', spaceList, 2);
+  const [x, XDropdown] = useDropdown('x', spaceList, 2);
+  const [y, YDropdown] = useDropdown('y', spaceList, 2);
   const data = range(10);
   const cardRect = { width: 200, height: 120 };
-  const props = { data, cardRect, justifyContent, lastRowAlign };
+  const spacing = {top, bottom, x, y};
+  const props = { data, cardRect, justifyContent, lastRowAlign, spacing };
   return (
     <div>
       <Navbar>
         {JustifyContentDropdown}
         {LastRowAlignDropdown}
       </Navbar>
-      <div style={{ height: 300 }}>
+      <Navbar>
+        <p class="navbar__item">spacing:</p>
+        {TopDropdown}
+        {BottomDropdown}
+        {XDropdown}
+        {YDropdown}
+      </Navbar>
+      <div style={{ height: 400 }}>
         <CardWindow {...props}>{SampleCard}</CardWindow>
       </div>
     </div>
@@ -119,7 +132,43 @@ function App() {
 }
 ```
 
-## Loading usage
+## Overscanning
+
+The `overScanPx` to render outside of the visible area. This property can be important for two reasons:
+
+- Overscanning by one row or column allows the tab key to focus on the next (not yet visible) item.
+- Overscanning slightly can reduce or prevent a flash of empty space when a user first starts scrolling.
+
+Note that overscanning too much can negatively impact performance. By default, CardWindow overscans by 200 px.
+
+Please check the Elements in the browser console. By default, this sample render only 24 cards.
+
+```jsx live
+function App() {
+  const [overScanPx, OverScanPxDropdown] = useDropdown('overScanPx', [0, 200, 1000, 2000], 1);
+  const data = range(100);
+  const cardRect = { width: 200, height: 120 };
+  const props = { data, cardRect, overScanPx };
+  return (
+    <div>
+      <Navbar>
+        {OverScanPxDropdown}
+      </Navbar>
+      <div style={{ height: 200 }}>
+        <CardWindow {...props}>{SampleCard}</CardWindow>
+      </div>
+    </div>
+  );
+}
+```
+
+## Infinite loading
+
+You need to manage the pending status. Set the loadMore function only if you can call it.
+
+The `loading` prop has 2 types, `card` and `row`.
+
+### type: `card`
 
 ```jsx live
 function App() {
@@ -131,7 +180,7 @@ function App() {
       timer = window.setTimeout(() => {
         console.log('load!');
         set((state) => ({ data: range(state.data.length + 10), pending: false }));
-      }, 2000);
+      }, 1000);
     }
     return () => {
       if (timer !== undefined) window.clearTimeout(timer);
@@ -139,12 +188,47 @@ function App() {
   }, [pending]);
 
   const cardRect = { width: 200, height: 120 };
-  const next = data.length < 30;
+  const next = data.length < 50;
   const loadMore = (!pending && next) ? () => set({ data, pending: true }) : undefined;
-  const loading = next ? { type: 'card', Component: LoadingComponent, loadMore } : undefined;
+  const loading = { type: 'card', Component: LoadingComponent, loadMore };
   return (
     <div style={{ height: 300 }}>
-      <CardWindow data={data} cardRect={cardRect} loading={loading}>
+      <CardWindow data={data} cardRect={cardRect} loading={next ? loading : undefined}>
+        {SampleCard}
+      </CardWindow>
+    </div>
+  );
+}
+```
+
+### type: `row`
+
+Component height is required for row type loading.
+
+```jsx live
+function App() {
+  const [{ data, pending }, set] = React.useState({ data: range(10), pending: false });
+
+  React.useEffect(() => {
+    let timer = undefined;
+    if (pending) {
+      timer = window.setTimeout(() => {
+        console.log('load!');
+        set((state) => ({ data: range(state.data.length + 10), pending: false }));
+      }, 1000);
+    }
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [pending]);
+
+  const cardRect = { width: 200, height: 120 };
+  const next = data.length < 50;
+  const loadMore = (!pending && next) ? () => set({ data, pending: true }) : undefined;
+  const loading = { type: 'row', Component: LoadingComponent, height: 80, loadMore };
+  return (
+    <div style={{ height: 300 }}>
+      <CardWindow data={data} cardRect={cardRect} loading={next ? loading : undefined}>
         {SampleCard}
       </CardWindow>
     </div>

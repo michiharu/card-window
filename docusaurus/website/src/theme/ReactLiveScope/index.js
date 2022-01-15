@@ -8,10 +8,11 @@
 import React from 'react';
 import { CardWindow, range } from 'card-window';
 
-const SampleCard = ({ index, style }) => (
+const SampleCard = ({ index, style, row, col,  }) => (
   <div className="card" style={style}>
     <div className="card__body">
       <h2>{index}</h2>
+      <p>row: {row}, col: {col}</p>
     </div>
   </div>
 );
