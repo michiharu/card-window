@@ -8,7 +8,7 @@
 import React from 'react';
 import { CardWindow, range } from 'card-window';
 
-const SampleCard = ({ index, style, row, col,  }) => (
+const SampleCard = ({ index, style, row, col }) => (
   <div className="card" style={style}>
     <div className="card__body">
       <h2>{index}</h2>
