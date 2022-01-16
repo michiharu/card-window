@@ -1,0 +1,26 @@
+# アクション名
+name: CI
+
+# タイミングを指定
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1 
+      - name: yarn install
+        run: yarn install
+      - name: eslint review
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: './**/*.{ts,tsx}'
+      - name: Run eslint and prettier
+        run: yarn fix
+      - name: Run Jest
+        run: yarn test
