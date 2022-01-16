@@ -390,7 +390,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     loading,
   } = props;
 
-  const spacing: Spacing = { ...defaultSpacing, ...spacingProp};
+  const spacing: Spacing = { ...defaultSpacing, ...spacingProp };
   const [offset, setOffset] = useState(0);
   const [rootRect, ref] = useResizeObserver<HTMLDivElement>();
   const colsRef = useRef(0);
