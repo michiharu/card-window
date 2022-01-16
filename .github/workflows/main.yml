@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v1 
       - name: yarn install
         run: yarn install
-      - name: Run eslint and prettier
+      - name: Run ESLint and Prettier
         run: yarn fix
       - name: Run Jest
         run: yarn test
