@@ -66,14 +66,14 @@ describe('getScrollContainerHeight', () => {
     test('length: 4', () => expect(getScrollContainerHeight(3, 4, card, spacing, loading)).toBe(230));
   });
   describe(`loading.type: 'card'`, () => {
-    const loading: LoadingCard = { type: 'card', Component: () => null };
+    const loading: LoadingCard = { type: 'card', LoadingComponent: () => null };
     test('length: 0', () => expect(getScrollContainerHeight(3, 0, card, spacing, loading)).toBe(120));
     test('length: 1', () => expect(getScrollContainerHeight(3, 1, card, spacing, loading)).toBe(120));
     test('length: 2', () => expect(getScrollContainerHeight(3, 2, card, spacing, loading)).toBe(120));
     test('length: 3', () => expect(getScrollContainerHeight(3, 3, card, spacing, loading)).toBe(230));
   });
   describe(`loading.type: 'row'`, () => {
-    const loading: LoadingRow = { type: 'row', height: 50, Component: () => null };
+    const loading: LoadingRow = { type: 'row', height: 50, LoadingComponent: () => null };
     test('length: 0', () => expect(getScrollContainerHeight(3, 0, card, spacing, loading)).toBe(70));
     test('length: 1', () => expect(getScrollContainerHeight(3, 1, card, spacing, loading)).toBe(180));
     test('length: 2', () => expect(getScrollContainerHeight(3, 2, card, spacing, loading)).toBe(180));
