@@ -64,7 +64,7 @@ export type LoadingCardComponentProps = {
 export type LoadingCard = {
   type: 'card';
   /** `LoadingCard.Component` is rendered after the last card. */
-  Component: React.ComponentType<LoadingCardComponentProps>;
+  LoadingComponent: React.ComponentType<LoadingCardComponentProps>;
   /** `loadMore` is called when `LoadingCard.Component` is rendered. */
   loadMore?(): void;
 };
@@ -88,7 +88,7 @@ export type LoadingRow = {
   /** `height` is the height of `LoadingRow.Component`. */
   height: number;
   /** `LoadingRow.Component` is rendered in the center next to the last row. */
-  Component: React.ComponentType<LoadingRowComponentProps>;
+  LoadingComponent: React.ComponentType<LoadingRowComponentProps>;
   /** `loadMore` is called when `LoadingRow.Component` is rendered. */
   loadMore?(): void;
 };
@@ -430,13 +430,13 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
                 {i !== 0 && item.col === 0 && <div style={{ width: '100%', height: spacing.y }} />}
                 {item.type === 'card' && <Children data={data} {...item} />}
                 {item.type === 'placeholder' && <div style={item.style} />}
-                {item.type === 'loading' && loading?.type === 'card' && <loading.Component {...item} />}
+                {item.type === 'loading' && loading?.type === 'card' && <loading.LoadingComponent {...item} />}
               </Fragment>
             );
           })}
           {loading?.type === 'row' && (
             <div style={{ width: '100%', paddingTop: spacing.y, display: 'flex', justifyContent: 'center' }}>
-              <loading.Component style={{ height: loading.height }} />
+              <loading.LoadingComponent style={{ height: loading.height }} />
             </div>
           )}
         </div>

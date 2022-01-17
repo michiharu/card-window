@@ -175,12 +175,10 @@ function App() {
   const [{ data, pending }, set] = React.useState({ data: range(10), pending: false });
 
   React.useEffect(() => {
+    const loaded = () => set((state) => ({ data: range(state.data.length + 10), pending: false }));
     let timer = undefined;
     if (pending) {
-      timer = window.setTimeout(() => {
-        console.log('load!');
-        set((state) => ({ data: range(state.data.length + 10), pending: false }));
-      }, 1000);
+      timer = window.setTimeout(loaded, 1000);
     }
     return () => {
       if (timer !== undefined) window.clearTimeout(timer);
@@ -189,11 +187,12 @@ function App() {
 
   const cardRect = { width: 200, height: 120 };
   const next = data.length < 50;
-  const loadMore = (!pending && next) ? () => set({ data, pending: true }) : undefined;
-  const loading = { type: 'card', Component: LoadingComponent, loadMore };
+  // Set the loadMore function only if you can call it.
+  const loadMore = !pending ? () => set({ data, pending: true }) : undefined;
+  const loading = next ? { type: 'card', LoadingComponent, loadMore } : undefined;
   return (
     <div style={{ height: 300 }}>
-      <CardWindow data={data} cardRect={cardRect} loading={next ? loading : undefined}>
+      <CardWindow data={data} cardRect={cardRect} loading={loading}>
         {SampleCard}
       </CardWindow>
     </div>
@@ -210,12 +209,10 @@ function App() {
   const [{ data, pending }, set] = React.useState({ data: range(10), pending: false });
 
   React.useEffect(() => {
+    const loaded = () => set((state) => ({ data: range(state.data.length + 10), pending: false }));
     let timer = undefined;
     if (pending) {
-      timer = window.setTimeout(() => {
-        console.log('load!');
-        set((state) => ({ data: range(state.data.length + 10), pending: false }));
-      }, 1000);
+      timer = window.setTimeout(loaded, 1000);
     }
     return () => {
       if (timer !== undefined) window.clearTimeout(timer);
@@ -224,11 +221,12 @@ function App() {
 
   const cardRect = { width: 200, height: 120 };
   const next = data.length < 50;
-  const loadMore = (!pending && next) ? () => set({ data, pending: true }) : undefined;
-  const loading = { type: 'row', Component: LoadingComponent, height: 80, loadMore };
+  // Set the loadMore function only if you can call it.
+  const loadMore = !pending ? () => set({ data, pending: true }) : undefined;
+  const loading = next ? { type: 'row', LoadingComponent, height: 80, loadMore } : undefined;
   return (
     <div style={{ height: 300 }}>
-      <CardWindow data={data} cardRect={cardRect} loading={next ? loading : undefined}>
+      <CardWindow data={data} cardRect={cardRect} loading={loading}>
         {SampleCard}
       </CardWindow>
     </div>
