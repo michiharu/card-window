@@ -124,6 +124,9 @@ export type CardWindowProps<T extends any[] = any[]> = {
   /** These values are `px`. */
   spacing?: Partial<Spacing>;
 
+  /** Maximum number of columns can be set. */
+  maxCols?: number;
+
   root?: {
     /** `root.className` are passed to the root element of `CardWindow`. */
     className?: string;
@@ -162,10 +165,20 @@ export const range = (_start: number, _end?: number): number[] => {
   return list;
 };
 
-const getColumns = (container: Rect, { width }: Rect, { x }: Spacing, justifyContent: JustifyContent): number => {
-  if (container.width < width) return 0;
-  if (justifyContent === 'space-evenly') return Math.max(1, Math.floor((container.width - x) / (width + x)));
-  return Math.floor((container.width + x) / (width + x));
+const getColumns = (
+  container: Rect,
+  card: Rect,
+  spacing: Spacing,
+  justifyContent: JustifyContent,
+  maxCols: number | undefined
+): number => {
+  if (container.width < card.width) return 0;
+  if (justifyContent === 'space-evenly') {
+    const cols = Math.max(1, Math.floor((container.width - spacing.x) / (card.width + spacing.x)));
+    return maxCols !== undefined ? Math.min(maxCols, cols) : cols;
+  }
+  const cols = Math.floor((container.width + spacing.x) / (card.width + spacing.x));
+  return maxCols !== undefined ? Math.min(maxCols, cols) : cols;
 };
 
 const getScrollContainerHeight = (
@@ -315,7 +328,6 @@ const getNextOffset = (offset: number, before: number, after: number, card: Rect
 };
 
 export const functions = {
-  range,
   getColumns,
   getScrollContainerHeight,
   getRenderFirstRow,
@@ -383,6 +395,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     getKey = (index) => index,
     overScanPx = 200,
     spacing: spacingProp,
+    maxCols = undefined,
     root = {},
     container = {},
     justifyContent = 'space-evenly',
@@ -394,7 +407,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const [offset, setOffset] = useState(0);
   const [rootRect, ref] = useResizeObserver<HTMLDivElement>();
   const colsRef = useRef(0);
-  const cols = getColumns(rootRect, card, spacing, justifyContent);
+  const cols = getColumns(rootRect, card, spacing, justifyContent, maxCols);
   const scrollContainerHeight = getScrollContainerHeight(cols, data.length, card, spacing, loading);
 
   useEffect(() => {

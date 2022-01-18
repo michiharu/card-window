@@ -12,7 +12,9 @@ const SampleCard = ({ index, style, row, col }) => (
   <div className="card" style={style}>
     <div className="card__body">
       <h2>{index}</h2>
-      <p>row: {row}, col: {col}</p>
+      <p>
+        row: {row}, col: {col}
+      </p>
     </div>
   </div>
 );
@@ -41,11 +43,27 @@ const useDropdown = (label, list, init = 0) => {
       <ul className="dropdown__menu">
         {list.map((item, i) => (
           <li key={item}>
-            <p className="dropdown__link" onClick={() => set(i)}>{item}</p>
+            <p className="dropdown__link" onClick={() => set(i)}>
+              {item}
+            </p>
           </li>
         ))}
       </ul>
     </div>
+  );
+  return [list[index], element];
+};
+
+const useTabs = (list, prefix = '') => {
+  const [index, set] = React.useState(0);
+  const element = (
+    <ul class="tabs tabs--block">
+      {list.map((item, i) => {
+        let className = 'tabs__item';
+        if (i === index) className += ' tabs__item--active';
+        return <li key={i} className={className} onClick={() => set(i)}>{prefix + item}</li>;
+      })}
+    </ul>
   );
   return [list[index], element];
 };
@@ -59,6 +77,7 @@ const ReactLiveScope = {
   LoadingComponent,
   Navbar,
   useDropdown,
+  useTabs,
 };
 
 export default ReactLiveScope;
