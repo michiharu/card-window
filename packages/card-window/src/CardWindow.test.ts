@@ -1,4 +1,4 @@
-import { functions } from './CardWindow';
+import { functions, range } from './CardWindow';
 
 import { LoadingCard, LoadingRow, Rect, Spacing } from '.';
 
@@ -10,7 +10,6 @@ const {
   getLastRow,
   getRenderLastRow,
   // getRenderRowRange,
-  range,
   // getItemProps,
   // getNextOffset,
 } = functions;
@@ -22,34 +21,60 @@ describe('getColumns', () => {
   describe('justifyContent: not space-evenly', () => {
     const justifyContent = 'center';
     test('container.width < card.width', () => {
-      expect(getColumns({ width: 100, height }, { width: 101, height }, { ...spacing, x: 0 }, justifyContent)).toBe(0);
+      expect(
+        getColumns({ width: 100, height }, { width: 101, height }, { ...spacing, x: 0 }, justifyContent, undefined)
+      ).toBe(0);
     });
     test('1 column patterns', () => {
-      expect(getColumns({ width: 100, height }, { width: 100, height }, { ...spacing, x: 0 }, justifyContent)).toBe(1);
-      expect(getColumns({ width: 100, height }, { width: 90, height }, { ...spacing, x: 0 }, justifyContent)).toBe(1);
-      expect(getColumns({ width: 100, height }, { width: 90, height }, { ...spacing, x: 10 }, justifyContent)).toBe(1);
-      expect(getColumns({ width: 100, height }, { width: 100, height }, { ...spacing, x: 10 }, justifyContent)).toBe(1);
-      expect(getColumns({ width: 200, height }, { width: 100, height }, { ...spacing, x: 10 }, justifyContent)).toBe(1);
+      expect(
+        getColumns({ width: 100, height }, { width: 100, height }, { ...spacing, x: 0 }, justifyContent, undefined)
+      ).toBe(1);
+      expect(
+        getColumns({ width: 100, height }, { width: 90, height }, { ...spacing, x: 0 }, justifyContent, undefined)
+      ).toBe(1);
+      expect(
+        getColumns({ width: 100, height }, { width: 90, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(1);
+      expect(
+        getColumns({ width: 100, height }, { width: 100, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(1);
+      expect(
+        getColumns({ width: 200, height }, { width: 100, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(1);
     });
 
     test('many columns patterns', () => {
-      expect(getColumns({ width: 200, height }, { width: 90, height }, { ...spacing, x: 10 }, justifyContent)).toBe(2);
-      expect(getColumns({ width: 200, height }, { width: 60, height }, { ...spacing, x: 20 }, justifyContent)).toBe(2);
-      expect(getColumns({ width: 200, height }, { width: 60, height }, { ...spacing, x: 11 }, justifyContent)).toBe(2);
-      expect(getColumns({ width: 200, height }, { width: 60, height }, { ...spacing, x: 10 }, justifyContent)).toBe(3);
+      expect(
+        getColumns({ width: 200, height }, { width: 90, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(2);
+      expect(
+        getColumns({ width: 200, height }, { width: 60, height }, { ...spacing, x: 20 }, justifyContent, undefined)
+      ).toBe(2);
+      expect(
+        getColumns({ width: 200, height }, { width: 60, height }, { ...spacing, x: 11 }, justifyContent, undefined)
+      ).toBe(2);
+      expect(
+        getColumns({ width: 200, height }, { width: 60, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(3);
     });
   });
   describe('justifyContent: space-evenly', () => {
     const justifyContent = 'space-evenly';
     test('container.width < card.width', () => {
-      expect(getColumns({ width: 100, height }, { width: 101, height }, { ...spacing, x: 0 }, justifyContent)).toBe(0);
+      expect(
+        getColumns({ width: 100, height }, { width: 101, height }, { ...spacing, x: 0 }, justifyContent, undefined)
+      ).toBe(0);
     });
     test('1 column: 200 < 90 * 2 + 10 * 3', () => {
-      expect(getColumns({ width: 200, height }, { width: 90, height }, { ...spacing, x: 10 }, justifyContent)).toBe(1);
+      expect(
+        getColumns({ width: 200, height }, { width: 90, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(1);
     });
 
     test('2 columns pattern: 200 < 80 * 2 + 10 * 3', () => {
-      expect(getColumns({ width: 200, height }, { width: 80, height }, { ...spacing, x: 10 }, justifyContent)).toBe(2);
+      expect(
+        getColumns({ width: 200, height }, { width: 80, height }, { ...spacing, x: 10 }, justifyContent, undefined)
+      ).toBe(2);
     });
   });
 });

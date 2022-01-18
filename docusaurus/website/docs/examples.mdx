@@ -109,7 +109,7 @@ function App() {
   const [y, YDropdown] = useDropdown('y', spaceList, 2);
   const data = range(10);
   const cardRect = { width: 200, height: 120 };
-  const spacing = {top, bottom, x, y};
+  const spacing = { top, bottom, x, y };
   const props = { data, cardRect, justifyContent, lastRowAlign, spacing };
   return (
     <div>
@@ -126,6 +126,55 @@ function App() {
       </Navbar>
       <div style={{ height: 400 }}>
         <CardWindow {...props}>{SampleCard}</CardWindow>
+      </div>
+    </div>
+  );
+}
+```
+
+## Columns
+
+### Automatically Adjust Columns
+
+The CardWindow uses ResizeObserver internally.
+Therefore, the column is automatically adjusted according to the element size specified by CSS.
+
+```jsx live
+function App() {
+  const [width, Tabs] = useTabs(['100%', '75%', '50%']);
+  const data = range(10000);
+  const cardRect = { width: 200, height: 120 };
+  return (
+    <div>
+      {Tabs}
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width, height: 300 }}>
+          <CardWindow data={data} cardRect={cardRect}>
+            {SampleCard}
+          </CardWindow>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Max columns
+
+You can set the maximum number of columns.
+
+```jsx live
+function App() {
+  const [maxCols, Dropdown] = useDropdown('Max columns', [1, 2, 3, 4, 5], 2);
+  const data = range(100);
+  const cardRect = { width: 200, height: 120 };
+  return (
+    <div>
+      <Navbar>{Dropdown}</Navbar>
+      <div style={{ height: 300 }}>
+        <CardWindow data={data} cardRect={cardRect} maxCols={maxCols}>
+          {SampleCard}
+        </CardWindow>
       </div>
     </div>
   );
@@ -151,9 +200,7 @@ function App() {
   const props = { data, cardRect, overScanPx };
   return (
     <div>
-      <Navbar>
-        {OverScanPxDropdown}
-      </Navbar>
+      <Navbar>{OverScanPxDropdown}</Navbar>
       <div style={{ height: 200 }}>
         <CardWindow {...props}>{SampleCard}</CardWindow>
       </div>
