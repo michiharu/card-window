@@ -162,6 +162,7 @@ function App() {
 ### Max columns
 
 You can set the maximum number of columns.
+The `maxCols` is a prop that goes well with `justifyContent="stretch"`.
 
 ```jsx live
 function App() {
@@ -172,7 +173,7 @@ function App() {
     <div>
       <Navbar>{Dropdown}</Navbar>
       <div style={{ height: 300 }}>
-        <CardWindow data={data} cardRect={cardRect} maxCols={maxCols}>
+        <CardWindow data={data} cardRect={cardRect} justifyContent="stretch" maxCols={maxCols}>
           {SampleCard}
         </CardWindow>
       </div>
@@ -190,7 +191,7 @@ The `overScanPx` to render outside of the visible area. This property can be imp
 
 Note that overscanning too much can negatively impact performance. By default, CardWindow overscans by 200 px.
 
-Please check the Elements in the browser console. By default, this sample render only 24 cards.
+Please check the Elements in the browser console. By default, this sample render 24 or less cards.
 
 ```jsx live
 function App() {
