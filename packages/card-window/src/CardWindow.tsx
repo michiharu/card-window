@@ -229,8 +229,8 @@ const getRenderRowRange = (
   card: Rect,
   spacing: Spacing,
   length: number,
+  cols: number,
   loadingCard: boolean,
-  cols: number
 ): [number, number] => {
   const renderFirst = getRenderFirstRow(offset, overScanPx, card, spacing);
   const rows = getRenderRows(overScanPx, container, card, spacing);
@@ -249,25 +249,26 @@ const getRenderContainerStyle = (
   return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
 };
 
-type BaseItemProps = { style: CSSProperties; row: number; col: number };
 const getBaseItemProps = (
   index: number,
   cols: number,
   justifyContent: JustifyContent,
   { width, height }: Rect,
   { x }: Spacing
-): BaseItemProps => {
+): Omit<CardProps, 'data' | 'index'> => {
   const row = Math.floor(index / cols);
   const col = index % cols;
   const marginLeft = col !== 0 && ['center', 'left', 'right', 'stretch'].includes(justifyContent) ? x : undefined;
-  const widthObj: CSSProperties = justifyContent !== 'stretch' ? { width } : { width, flexGrow: 1 };
-  const style = { ...widthObj, height, marginLeft };
-  return { style, row, col };
+  const flexGrow = justifyContent === 'stretch' ? 1 : undefined;
+  const style = { width, flexGrow, height, marginLeft };
+  return { row, col, style };
 };
 
-type PlaceholderTypeProps = { type: 'placeholder' } & BaseItemProps;
-type LoadingTypeProps = { type: 'loading' } & BaseItemProps;
-type ItemProps = ({ type: 'card' } & Omit<CardProps, 'data'>) | PlaceholderTypeProps | LoadingTypeProps;
+type CardTypeProps = { type: 'card' } & Omit<CardProps, 'data'>;
+type PlaceholderTypeProps = { type: 'placeholder' } & Omit<CardProps, 'data' | 'index'>;
+type LoadingTypeProps = { type: 'loading' } & Omit<CardProps, 'data' | 'index'>;
+type ItemProps = CardTypeProps | PlaceholderTypeProps | LoadingTypeProps;
+export type ItemType = ItemProps['type'];
 
 const getItemProps = (
   rows: [number, number],
@@ -303,7 +304,7 @@ const getItemProps = (
     return range(start, stop).map((index) => {
       const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
       const isLastRow = getLastRow(length, cols, loadingCard) === base.row;
-      if (!isLastRow) return { type: 'card', index, ...base };
+      if (!isLastRow || placeholderCount === cols) return { type: 'card', index, ...base };
       if (base.col < placeholderCount) return { type: 'placeholder', ...base };
       if (base.col < placeholderCount + lastRowCardCount)
         return { type: 'card', index: index - placeholderCount, ...base };
@@ -314,7 +315,7 @@ const getItemProps = (
   const stop = Math.min(length + (loadingCard ? 1 : 0), (rows[1] + 1) * cols);
   return range(start, stop).map((index) => {
     const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
-    if (!loadingCard || index !== stop - 1) return { type: 'card', index, ...base };
+    if (!loadingCard || index !== length) return { type: 'card', index, ...base };
     return { type: 'loading', ...base };
   });
 };
@@ -336,6 +337,7 @@ export const functions = {
   getRenderLastRow,
   getRenderRowRange,
   getRenderContainerStyle,
+  getBaseItemProps,
   getItemProps,
   getNextOffset,
 };
@@ -429,7 +431,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...root.style, overflow: 'auto' };
   const scrollContainerStyle = { ...container.style, width: '100%', height: scrollContainerHeight };
   const handleScroll: UIEventHandler<HTMLDivElement> = (e) => setOffset(e.currentTarget.scrollTop);
-  const renderRows = getRenderRowRange(offset, overScanPx, rootRect, card, spacing, data.length, loadingCard, cols);
+  const renderRows = getRenderRowRange(offset, overScanPx, rootRect, card, spacing, data.length, cols, loadingCard);
   const renderContainerStyle = getRenderContainerStyle(renderRows[0], card, spacing, justifyContent);
   const items = getItemProps(renderRows, cols, data.length, card, spacing, justifyContent, lastRowAlign, loadingCard);
   return (

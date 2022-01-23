@@ -26,6 +26,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "coverage": "yarn test  --coverage",
     "fix": "npm run format && npm run lint && npx sort-package-json",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "lint": "eslint --fix --ext .ts,.tsx ./src",

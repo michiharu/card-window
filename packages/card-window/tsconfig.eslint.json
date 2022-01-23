@@ -3,6 +3,7 @@
   "include": [
     "src/**/*.ts",
     ".eslintrc.js",
+    "jest.config.js",
     "rollup.config.js"
   ],
   "exclude": [
