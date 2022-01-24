@@ -230,7 +230,7 @@ const getRenderRowRange = (
   spacing: Spacing,
   length: number,
   cols: number,
-  loadingCard: boolean,
+  loadingCard: boolean
 ): [number, number] => {
   const renderFirst = getRenderFirstRow(offset, overScanPx, card, spacing);
   const rows = getRenderRows(overScanPx, container, card, spacing);
@@ -322,10 +322,9 @@ const getItemProps = (
 
 const getNextOffset = (offset: number, before: number, after: number, card: Rect, spacing: Spacing): number => {
   const height = card.height + spacing.y;
-  const remainingOffset = height - (offset % height);
-  const beforeRow = Math.ceil(offset / height);
-  const afterRow = Math.round((beforeRow * before) / after);
-  return afterRow * height - remainingOffset;
+  const items = before * (Math.floor(offset / height) + (before < after ? 1 : 0));
+  const rows = Math.floor(items / after);
+  return Math.max(0, height * rows + (offset % height));
 };
 
 export const functions = {

@@ -13,7 +13,7 @@ const {
   getRenderContainerStyle,
   getBaseItemProps,
   getItemProps,
-  // getNextOffset,
+  getNextOffset,
 } = functions;
 
 describe('range', () => {
@@ -420,3 +420,19 @@ describe('getItemProps', () => {
       ])(name, byCase('inherit', true)));
   });
 });
+
+describe('getNextOffset', () =>
+  test.each([
+    [3, 4],
+    [4, 5],
+    [3, 5],
+  ])('before: %p, after: %p', (before, after) => {
+    const card: Rect = { width: 100, height: 80 };
+    const spacing: Spacing = { x: 0, y: 20, top: 0, bottom: 0 };
+    range(10000).forEach((offset) => {
+      const up1 = getNextOffset(offset, before, after, card, spacing);
+      const down1 = getNextOffset(up1, after, before, card, spacing);
+      const up2 = getNextOffset(down1, before, after, card, spacing);
+      expect(getNextOffset(up2, after, before, card, spacing)).toBe(down1);
+    })
+  }));
