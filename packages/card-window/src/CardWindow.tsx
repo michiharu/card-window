@@ -406,7 +406,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
 
   const spacing: Spacing = { ...defaultSpacing, ...spacingProp };
   const [offset, setOffset] = useState(0);
-  const { ref, width = 0, height = 0} = useResizeObserver<HTMLDivElement>();
+  const { ref, width = 0, height = 0 } = useResizeObserver<HTMLDivElement>();
   const rootRect = { width, height };
   const colsRef = useRef(0);
   const cols = getColumns(rootRect, card, spacing, justifyContent, maxCols);
