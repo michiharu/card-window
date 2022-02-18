@@ -7,11 +7,11 @@
   ],
   "scripts": {
     "build": "lerna run build --scope card-window",
+    "coverage": "lerna exec --scope card-window -- yarn test --coverage",
     "fix": "lerna run fix --scope card-window",
     "postinstall": "npx sort-package-json",
     "pack": "lerna exec --scope card-window -- npm pack",
     "test": "lerna run test --scope card-window",
-    "coverage": "lerna exec --scope card-window -- yarn test --coverage",
     "watch": "lerna run watch --scope card-window"
   },
   "devDependencies": {
