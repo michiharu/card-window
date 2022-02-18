@@ -368,8 +368,8 @@ export const functions = {
  * }
  * ```
  */
-export const useResizeObserver = <T extends Element>(initial = { width: 0, height: 0 }): [Rect, RefObject<T>] => {
-  const [rect, set] = useState<Rect>(initial);
+export const useResizeObserver = <T extends Element>(): Partial<Rect> & { ref: RefObject<T> } => {
+  const [rect, set] = useState<Partial<Rect>>({ width: undefined, height: undefined });
   const ref = useRef<T>(null);
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -383,7 +383,7 @@ export const useResizeObserver = <T extends Element>(initial = { width: 0, heigh
     }
     return () => resizeObserver.disconnect();
   }, []);
-  return [rect, ref];
+  return { ref, ...rect };
 };
 
 const defaultSpacing = { x: 8, y: 8, top: 8, bottom: 8 };
@@ -406,7 +406,8 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
 
   const spacing: Spacing = { ...defaultSpacing, ...spacingProp };
   const [offset, setOffset] = useState(0);
-  const [rootRect, ref] = useResizeObserver<HTMLDivElement>();
+  const { ref, width = 0, height = 0} = useResizeObserver<HTMLDivElement>();
+  const rootRect = { width, height };
   const colsRef = useRef(0);
   const cols = getColumns(rootRect, card, spacing, justifyContent, maxCols);
   const scrollContainerHeight = getScrollContainerHeight(cols, data.length, card, spacing, loading);
