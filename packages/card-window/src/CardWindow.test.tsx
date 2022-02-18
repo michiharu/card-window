@@ -1,6 +1,20 @@
-import { LastRowAlign, Loading, functions, range } from './CardWindow';
+/* eslint-disable class-methods-use-this */
+import * as React from 'react';
 
-import { JustifyContent, Rect, Spacing } from '.';
+import { render, screen } from '@testing-library/react';
+
+import CardWindow, {
+  CardProps,
+  JustifyContent,
+  LastRowAlign,
+  Loading,
+  Rect,
+  Spacing,
+  functions,
+  range,
+} from './CardWindow';
+
+import '@testing-library/jest-dom';
 
 const {
   getColumns,
@@ -434,5 +448,45 @@ describe('getNextOffset', () =>
       const down1 = getNextOffset(up1, after, before, card, spacing);
       const up2 = getNextOffset(down1, before, after, card, spacing);
       expect(getNextOffset(up2, after, before, card, spacing)).toBe(down1);
-    })
+    });
   }));
+
+let instanceResize: ResizeObserver | null = null;
+let callbackResize: ResizeObserverCallback | null = null;
+global.ResizeObserver = class MockResizeObjerver {
+  constructor(callback: ResizeObserverCallback) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    instanceResize = this;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    callbackResize = callback;
+  }
+
+  disconnect() {}
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  observe(target: Element, options?: ResizeObserverOptions) {}
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  unobserve(target: Element) {}
+};
+
+describe('CardWindow', () => {
+  const Card: React.FC<CardProps> = ({ data, index, style }) => (
+    <div style={{ ...style, backgroundColor: '#fff' }}>
+      <div style={{ padding: 16 }}>
+        <h2>{data[index]}</h2>
+      </div>
+    </div>
+  );
+  test('renders App component', () => {
+    const data = range(10000);
+    const cardRect = { width: 300, height: 200 };
+    render(
+      <CardWindow data={data} cardRect={cardRect}>
+        {Card}
+      </CardWindow>
+    );
+
+    screen.debug();
+  });
+});
