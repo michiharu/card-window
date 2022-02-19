@@ -1,7 +1,10 @@
 /* eslint-disable class-methods-use-this */
 import * as React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import {
+  render,
+  // screen
+} from '@testing-library/react';
 
 import CardWindow, {
   CardProps,
@@ -481,6 +484,6 @@ describe('CardWindow', () => {
       </CardWindow>
     );
 
-    screen.debug();
+    // screen.debug();
   });
 });
