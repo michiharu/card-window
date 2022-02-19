@@ -7,10 +7,15 @@
   ],
   "scripts": {
     "build": "lerna run build --scope card-window",
+    "ci": "yarn fix && yarn test",
     "coverage": "lerna exec --scope card-window -- yarn test --coverage",
+    "deploy": "lerna exec --scope website -- GIT_USER=michiharu yarn deploy",
     "fix": "lerna run fix --scope card-window",
-    "postinstall": "npx sort-package-json",
-    "pack": "lerna exec --scope card-window -- npm pack",
+    "postinstall": "lerna exec yarn && npx sort-package-json",
+    "package": "lerna exec --scope card-window -- npm pack",
+    "publish": "lerna exec --scope card-window -- npm publish",
+    "publish:all": "yarn ci && yarn package && yarn publish && yarn deploy",
+    "start": "lerna run start --scope website",
     "test": "lerna run test --scope card-window",
     "watch": "lerna run watch --scope card-window"
   },
