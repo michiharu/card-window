@@ -51,18 +51,12 @@ describe('range', () => {
 
 describe('getColumns(container, card, spacing, justifyContent, maxCols)', () => {
   test('container.width < card.width => 0', () => {
-    const container: Rect = { width: 100, height: 0 };
-    const card: Rect = { width: 120, height: 0 };
-    const spacing = { x: 0, y: 0, top: 0, bottom: 0 };
-    expect(getColumns(container, card, spacing, 'center', undefined)).toBe(0);
+    expect(getColumns(100, 120, 0, 'center', undefined)).toBe(0);
   });
   describe('container.width: 200', () => {
-    const container: Rect = { width: 200, height: 0 };
     const name = 'card.width: %p, spacing.x: %p => %p';
     const byCase = (justifyContent: JustifyContent, maxCols: number | undefined) => (width, x, expected) => {
-      const card: Rect = { width, height: 0 };
-      const spacing = { x, y: 0, top: 0, bottom: 0 };
-      expect(getColumns(container, card, spacing, justifyContent, maxCols)).toBe(expected);
+      expect(getColumns(200, width, x, justifyContent, maxCols)).toBe(expected);
     };
     describe(`justifyContent: not space-evenly('center')`, () => {
       describe('maxCols: undefined', () =>
@@ -161,11 +155,11 @@ describe('getScrollContainerHeight(cols, length, card, spacing, loading)', () =>
 
     describe(`loading.type: 'card'`, () =>
       test.each([
-        [0, 100, 0, 0, 0, 100],
-        [2, 100, 0, 0, 0, 100],
-        [3, 100, 0, 0, 0, 200],
-        [5, 100, 0, 0, 0, 200],
-        [6, 100, 0, 0, 0, 300],
+        [1, 100, 0, 0, 0, 100],
+        [3, 100, 0, 0, 0, 100],
+        [4, 100, 0, 0, 0, 200],
+        [6, 100, 0, 0, 0, 200],
+        [7, 100, 0, 0, 0, 300],
       ])(name, byCase(cols, { type: 'card', LoadingComponent: () => null })));
 
     describe(`loading.type: 'row'`, () =>
@@ -235,41 +229,41 @@ describe('getRenderRows', () => {
 });
 
 describe('getLastRow', () => {
-  const name = 'length: $length, expected: $expected';
+  const name = 'length: $length, loadingCards: $loadingCards, expected: $expected';
   const byCase =
-    (cols: number, loadingCard: boolean) =>
-    ({ length, expected }) =>
-      expect(getLastRow(length, cols, loadingCard)).toEqual(expected);
+    (cols: number) =>
+    ({ length, loadingCards, expected }) =>
+      expect(getLastRow(length, loadingCards, cols)).toEqual(expected);
 
-  describe('cols: 3, loadingCard: false', () =>
+  describe('cols: 3', () =>
     test.each`
-      length | expected
-      ${0}   | ${0}
-      ${3}   | ${0}
-      ${4}   | ${1}
-      ${6}   | ${1}
-      ${7}   | ${2}
-    `(name, byCase(3, false)));
+      length | loadingCards | expected
+      ${0}   | ${0}         | ${0}
+      ${3}   | ${0}         | ${0}
+      ${4}   | ${0}         | ${1}
+      ${6}   | ${0}         | ${1}
+      ${7}   | ${0}         | ${2}
+    `(name, byCase(3)));
 
-  describe('cols: 3,loadingCard: true', () =>
+  describe('cols: 3', () =>
     test.each`
-      length | expected
-      ${0}   | ${0}
-      ${2}   | ${0}
-      ${3}   | ${1}
-      ${5}   | ${1}
-      ${6}   | ${2}
-    `(name, byCase(3, true)));
+      length | loadingCards | expected
+      ${0}   | ${1}         | ${0}
+      ${2}   | ${1}         | ${0}
+      ${3}   | ${1}         | ${1}
+      ${5}   | ${1}         | ${1}
+      ${6}   | ${1}         | ${2}
+    `(name, byCase(3)));
 
-  describe('cols: 2, loadingCard: false', () =>
+  describe('cols: 2', () =>
     test.each`
-      length | expected
-      ${0}   | ${0}
-      ${2}   | ${0}
-      ${3}   | ${1}
-      ${4}   | ${1}
-      ${5}   | ${2}
-    `(name, byCase(2, false)));
+      length | loadingCards | expected
+      ${0}   | ${0}         | ${0}
+      ${2}   | ${0}         | ${0}
+      ${3}   | ${0}         | ${1}
+      ${4}   | ${0}         | ${1}
+      ${5}   | ${0}         | ${2}
+    `(name, byCase(2)));
 });
 
 describe('getRenderLastRow', () =>
@@ -286,33 +280,33 @@ describe('getRenderLastRow', () =>
   ));
 
 describe('getRenderRowRange', () => {
-  const name = 'offset: %p, length: %p, cols: %p, loadingCard: %p => %p';
-  const byCase = (overScanPx: number) => (offset, length, cols, loadingCard, expected) => {
+  const name = 'offset: %p, length: %p, loadingCard: %p, cols: %p => %p';
+  const byCase = (overScanPx: number) => (offset, length, loadingCards, cols, expected) => {
     const container: Rect = { width: 200, height: 200 };
     const card: Rect = { width: 0, height: 100 };
     const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
-    const result = getRenderRowRange(offset, overScanPx, container, card, spacing, length, cols, loadingCard);
+    const result = getRenderRowRange(length, loadingCards, cols, offset, overScanPx, container, card, spacing);
     expect(result).toEqual(expected);
   };
 
   describe('overScanPx: 0', () =>
     test.each([
-      [0, 3, 3, false, [0, 0]],
-      [0, 4, 3, false, [0, 1]],
-      [99, 100, 3, false, [0, 2]],
-      [100, 100, 3, false, [1, 3]],
-      [3299, 100, 3, false, [32, 33]],
-      [3300, 100, 3, false, [33, 33]],
+      [0, 3, 0, 3, [0, 0]],
+      [0, 4, 0, 3, [0, 1]],
+      [99, 100, 0, 3, [0, 2]],
+      [100, 100, 0, 3, [1, 3]],
+      [3299, 100, 0, 3, [32, 33]],
+      [3300, 100, 0, 3, [33, 33]],
     ])(name, byCase(0)));
 
   describe('overScanPx: 200', () =>
     test.each([
-      [0, 3, 3, false, [0, 0]],
-      [0, 4, 3, false, [0, 1]],
-      [299, 100, 3, false, [0, 6]],
-      [300, 100, 3, false, [1, 7]],
-      [3299, 100, 3, false, [30, 33]],
-      [3300, 100, 3, false, [31, 33]],
+      [0, 3, 0, 3, [0, 0]],
+      [0, 4, 0, 3, [0, 1]],
+      [299, 100, 0, 3, [0, 6]],
+      [300, 100, 0, 3, [1, 7]],
+      [3299, 100, 0, 3, [30, 33]],
+      [3300, 100, 0, 3, [31, 33]],
     ])(name, byCase(200)));
 });
 
@@ -372,66 +366,66 @@ describe('getBaseItemProps', () => {
 
 describe('getItemProps', () => {
   const name = 'rows: %p, cols: %p, length: %p => %p';
-  const byCase = (lastRowAlign: LastRowAlign, loadingCard: boolean) => (rows, cols, length, expected) => {
+  const byCase = (lastRowAlign: LastRowAlign, loadingCards: number) => (length, rows, expected) => {
     const card: Rect = { width: 0, height: 0 };
     const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
-    const items = getItemProps(rows, cols, length, card, spacing, 'space-evenly', lastRowAlign, loadingCard);
+    const items = getItemProps(length, loadingCards, 3, rows, card, spacing, 'space-evenly', lastRowAlign);
     expect(items.length).toBe(expected.length);
     expect(items.map((item) => item.type)).toEqual(expected);
   };
   describe('lastRowAlign: left', () => {
-    describe('loadingCard: false', () =>
+    describe('loadingCards: 0', () =>
       test.each([
-        [[0, 1], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[31, 32], 3, 100, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 100, ['card', 'card', 'card', 'card', 'placeholder', 'placeholder']],
-        [[32, 33], 3, 101, ['card', 'card', 'card', 'card', 'card', 'placeholder']],
-        [[32, 33], 3, 102, ['card', 'card', 'card', 'card', 'card', 'card']],
-      ])(name, byCase('left', false)));
-    describe('loadingCard: true', () =>
+        [99, [0, 1], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [100, [31, 32], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [100, [32, 33], ['card', 'card', 'card', 'card', 'placeholder', 'placeholder']],
+        [101, [32, 33], ['card', 'card', 'card', 'card', 'card', 'placeholder']],
+        [102, [32, 33], ['card', 'card', 'card', 'card', 'card', 'card']],
+      ])(name, byCase('left', 0)));
+    describe('loadingCards: 1', () =>
       test.each([
-        [[0, 1], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[31, 32], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 99, ['card', 'card', 'card', 'loading', 'placeholder', 'placeholder']],
-        [[32, 33], 3, 100, ['card', 'card', 'card', 'card', 'loading', 'placeholder']],
-        [[32, 33], 3, 101, ['card', 'card', 'card', 'card', 'card', 'loading']],
-      ])(name, byCase('left', true)));
+        [99, [0, 1], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [99, [31, 32], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [99, [32, 33], ['card', 'card', 'card', 'loading', 'placeholder', 'placeholder']],
+        [100, [32, 33], ['card', 'card', 'card', 'card', 'loading', 'placeholder']],
+        [101, [32, 33], ['card', 'card', 'card', 'card', 'card', 'loading']],
+      ])(name, byCase('left', 1)));
   });
   describe('lastRowAlign: right', () => {
-    describe('loadingCard: false', () =>
+    describe('loadingCards: 0', () =>
       test.each([
-        [[0, 1], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[31, 32], 3, 100, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 100, ['card', 'card', 'card', 'placeholder', 'placeholder', 'card']],
-        [[32, 33], 3, 101, ['card', 'card', 'card', 'placeholder', 'card', 'card']],
-        [[32, 33], 3, 102, ['card', 'card', 'card', 'card', 'card', 'card']],
-      ])(name, byCase('right', false)));
-    describe('loadingCard: true', () =>
+        [99, [0, 1], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [100, [31, 32], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [100, [32, 33], ['card', 'card', 'card', 'placeholder', 'placeholder', 'card']],
+        [101, [32, 33], ['card', 'card', 'card', 'placeholder', 'card', 'card']],
+        [102, [32, 33], ['card', 'card', 'card', 'card', 'card', 'card']],
+      ])(name, byCase('right', 0)));
+    describe('loadingCards: 1', () =>
       test.each([
-        [[0, 1], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[31, 32], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 99, ['card', 'card', 'card', 'placeholder', 'placeholder', 'loading']],
-        [[32, 33], 3, 100, ['card', 'card', 'card', 'placeholder', 'card', 'loading']],
-        [[32, 33], 3, 101, ['card', 'card', 'card', 'card', 'card', 'loading']],
-      ])(name, byCase('right', true)));
+        [99, [0, 1], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [99, [31, 32], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [99, [32, 33], ['card', 'card', 'card', 'placeholder', 'placeholder', 'loading']],
+        [100, [32, 33], ['card', 'card', 'card', 'placeholder', 'card', 'loading']],
+        [101, [32, 33], ['card', 'card', 'card', 'card', 'card', 'loading']],
+      ])(name, byCase('right', 1)));
   });
   describe('lastRowAlign: inherit', () => {
-    describe('loadingCard: false', () =>
+    describe('loadingCards: 0', () =>
       test.each([
-        [[0, 1], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[31, 32], 3, 100, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 100, ['card', 'card', 'card', 'card']],
-        [[32, 33], 3, 101, ['card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 102, ['card', 'card', 'card', 'card', 'card', 'card']],
-      ])(name, byCase('inherit', false)));
-    describe('loadingCard: true', () =>
+        [99, [0, 1], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [100, [31, 32], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [100, [32, 33], ['card', 'card', 'card', 'card']],
+        [101, [32, 33], ['card', 'card', 'card', 'card', 'card']],
+        [102, [32, 33], ['card', 'card', 'card', 'card', 'card', 'card']],
+      ])(name, byCase('inherit', 0)));
+    describe('loadingCards: 1', () =>
       test.each([
-        [[0, 1], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[31, 32], 3, 99, ['card', 'card', 'card', 'card', 'card', 'card']],
-        [[32, 33], 3, 99, ['card', 'card', 'card', 'loading']],
-        [[32, 33], 3, 100, ['card', 'card', 'card', 'card', 'loading']],
-        [[32, 33], 3, 101, ['card', 'card', 'card', 'card', 'card', 'loading']],
-      ])(name, byCase('inherit', true)));
+        [99, [0, 1], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [99, [31, 32], ['card', 'card', 'card', 'card', 'card', 'card']],
+        [99, [32, 33], ['card', 'card', 'card', 'loading']],
+        [100, [32, 33], ['card', 'card', 'card', 'card', 'loading']],
+        [101, [32, 33], ['card', 'card', 'card', 'card', 'card', 'loading']],
+      ])(name, byCase('inherit', 1)));
   });
 });
 
