@@ -266,8 +266,8 @@ const getBaseItemProps = (
 };
 
 type CardTypeProps = { type: 'card' } & Omit<CardProps, 'data'>;
-type PlaceholderTypeProps = { type: 'placeholder' } & Omit<CardProps, 'data'>;
-type LoadingTypeProps = { type: 'loading' } & Omit<CardProps, 'data'>;
+type PlaceholderTypeProps = { type: 'placeholder' } & Omit<CardProps, 'data' | 'index'>;
+type LoadingTypeProps = { type: 'loading' } & Omit<CardProps, 'data' | 'index'>;
 type ItemProps = CardTypeProps | PlaceholderTypeProps | LoadingTypeProps;
 export type ItemType = ItemProps['type'];
 
@@ -282,7 +282,7 @@ const getStop = (
   return Math.min(length + loadingCards, (rows[1] + 1) * cols);
 };
 
-const getItemType = (
+const getItemTypeAndIndex = (
   index: number,
   col: number,
   length: number,
@@ -290,18 +290,18 @@ const getItemType = (
   lastRowAlign: LastRowAlign,
   isLastRow: boolean,
   stop: number
-): ItemType => {
+): { type: ItemType; index?: number } => {
   if (lastRowAlign !== 'right') {
-    if (index < length) return 'card';
-    if (index < length + loadingCards) return 'loading';
-    return 'placeholder';
+    if (index < length) return { type: 'card', index };
+    if (index < length + loadingCards) return { type: 'loading' };
+    return { type: 'placeholder' };
   }
   // lastRowAlign === 'right'
-  if (!isLastRow) return index < length ? 'card' : 'loading';
+  if (!isLastRow) return index < length ? { type: 'card', index } : { type: 'loading' };
 
   const placeholderCount = stop - length - loadingCards;
-  if (col < placeholderCount) return 'placeholder';
-  return index - placeholderCount < length ? 'card' : 'loading';
+  if (col < placeholderCount) return { type: 'placeholder' };
+  return index - placeholderCount < length ? { type: 'card', index: index - placeholderCount } : { type: 'loading' };
 };
 
 const getItemProps = (
@@ -318,10 +318,10 @@ const getItemProps = (
   if (length + loadingCards === 0) return [];
   const start = rows[0] * cols;
   const stop = getStop(rows, cols, lastRowAlign, length, loadingCards);
-  return range(start, stop).map((index) => {
-    const base = getBaseItemProps(index, cols, justifyContent, card, spacing);
+  return range(start, stop).map((i) => {
+    const base = getBaseItemProps(i, cols, justifyContent, card, spacing);
     const isLastRow = getLastRow(length, loadingCards, cols) === base.row;
-    const type = getItemType(index, base.col, length, loadingCards, lastRowAlign, isLastRow, stop);
+    const { type, index } = getItemTypeAndIndex(i, base.col, length, loadingCards, lastRowAlign, isLastRow, stop);
     return { type, index, ...base };
   });
 };
@@ -452,7 +452,7 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
 
   useEffect(() => {
     if (scrollContainerHeight !== 0 && loading?.loadMore) {
-      const lastItem = items.find((item) => item.index === data.length - 1);
+      const lastItem = items.find((item) => item.type === 'card' && item.index === data.length - 1);
       if (lastItem) loading.loadMore();
     }
   }, [scrollContainerHeight, loading?.loadMore, items]);
