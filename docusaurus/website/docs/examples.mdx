@@ -226,7 +226,7 @@ function App() {
     const loaded = () => set((state) => ({ data: range(state.data.length + 10), pending: false }));
     let timer = undefined;
     if (pending) {
-      timer = window.setTimeout(loaded, 1000);
+      timer = window.setTimeout(loaded, 2000);
     }
     return () => {
       if (timer !== undefined) window.clearTimeout(timer);
@@ -234,7 +234,7 @@ function App() {
   }, [pending]);
 
   const cardRect = { width: 200, height: 120 };
-  const next = data.length < 50;
+  const next = data.length < 100;
   // Set the loadMore function only if you can call it.
   const loadMore = !pending ? () => set({ data, pending: true }) : undefined;
   const loading = next ? { type: 'card', LoadingComponent, loadMore } : undefined;
@@ -260,7 +260,7 @@ function App() {
     const loaded = () => set((state) => ({ data: range(state.data.length + 10), pending: false }));
     let timer = undefined;
     if (pending) {
-      timer = window.setTimeout(loaded, 1000);
+      timer = window.setTimeout(loaded, 2000);
     }
     return () => {
       if (timer !== undefined) window.clearTimeout(timer);
@@ -268,7 +268,7 @@ function App() {
   }, [pending]);
 
   const cardRect = { width: 200, height: 120 };
-  const next = data.length < 50;
+  const next = data.length < 100;
   // Set the loadMore function only if you can call it.
   const loadMore = !pending ? () => set({ data, pending: true }) : undefined;
   const loading = next ? { type: 'row', LoadingComponent, height: 80, loadMore } : undefined;
