@@ -45,11 +45,10 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-const seed = (int: number) => Math.floor(Math.random() * int);
 const cardSize = 80;
 
 function FeatureDemo({ title, description }: FeatureItem) {
-  const ref = React.useRef(range(1001).map(() => seed(100)));
+  const ref = React.useRef(range(1000).map((i) => (i % 30) * 1.5));
 
   return (
     <div className={clsx('col col--4')}>

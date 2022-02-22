@@ -5,7 +5,7 @@ It is very much inspired by Brian Vaughn's react-window.
 
 ## Installation
 
-card-window is available as an npm package.
+`card-window` is available as an npm package.
 
 ```bash
 // with npm

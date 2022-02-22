@@ -7,7 +7,7 @@ sidebar_position: 1
 
 ## Installation
 
-card-window is available as an npm package.
+`card-window` is available as an npm package.
 
 ### with npm
 
@@ -27,29 +27,24 @@ yarn add card-window
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 
-import { CardWindow } from 'card-window';
+import { CardWindow, CardProps, range } from 'card-window';
 
-type CardProps = {
-  data: any[];
-  index: number;
-  style: React.CSSProperties;
-};
-
-const Card: React.FC<CardProps> = ({ data, index, style }) => (
-  <div style={{ ...style, backgroundColor: '#fff' }}>
-    <div style={{ padding: 16 }}>
-      <h2>{data[index]}</h2>
-    </div>
+const SampleCard: React.FC<CardProps> = ({ index, style, row, col }) => (
+  <div style={style}>
+    <h2>{index}</h2>
+    <p>row: {row}, col: {col}</p>
   </div>
 );
 
 const App: React.FC = () => {
-  const data = [...Array(10000)].map((_, i) => i);
-  const cardRect = { width: 300, height: 200 };
+  const data = range(10000); // [0, 1, 2, ..., 9999]
+  const cardRect = { width: 200, height: 120 };
   return (
-    <CardWindow data={data} cardRect={cardRect} >
-      {Card}
-    </CardWindow>
+    <div style={{ height: 400 }}>
+      <CardWindow data={data} cardRect={cardRect}>
+        {SampleCard}
+      </CardWindow>
+    </div>
   );
 };
 
