@@ -8,7 +8,7 @@ export type CardProps<T extends any[] = any[]> = {
   /** `index` is the index of the data allocated to the `CardWindow.children` component. */
   index: number;
   /** `style` should be passed to the root of the `CardWindow.children` component. */
-  style: React.CSSProperties;
+  style: CSSProperties;
   /** `row` is the rendered row. */
   row: number;
   /** `col` is the rendered column. */
@@ -18,8 +18,8 @@ export type CardProps<T extends any[] = any[]> = {
 /** These values are `px`. */
 export type Rect = { width: number; height: number };
 
-/** These values are `px`. */
-export type Spacing = { x: number; y: number; top: number; bottom: number };
+/** These values are `px`. The defaults are 8px. */
+export type Spacing = { x: number; y: number; top: number; bottom: number; left: number; right: number };
 
 /**
  * JustifyContent only supports 7 values.
@@ -46,7 +46,7 @@ export type Loading = LoadingCard | LoadingRow;
 /** CardWindow provides `LoadingCard.Component` with this props. */
 export type LoadingCardComponentProps = {
   /** `style` should be passed to the root of `LoadingCard.Component`. */
-  style: React.CSSProperties;
+  style: CSSProperties;
   /** `row` is the rendered row. */
   row: number;
   /** `col` is the rendered column. */
@@ -74,7 +74,7 @@ export type LoadingCard = {
 /** CardWindow provides `LoadingRow.Component` with this props. */
 export type LoadingRowComponentProps = {
   /** `style` should be passed to the root of `LoadingRow.Component`. */
-  style: React.CSSProperties;
+  style: CSSProperties;
 };
 
 /**
@@ -123,7 +123,7 @@ export type CardWindowProps<T extends any[] = any[]> = {
   /** The number of px to render outside of the visible area. By default, `CardWindow` overscans 200px. */
   overScanPx?: number;
 
-  /** These values are `px`. */
+  /** These values are `px`. The defaults are 8px. */
   spacing?: Partial<Spacing>;
 
   /** Maximum number of columns can be set. */
@@ -133,14 +133,14 @@ export type CardWindowProps<T extends any[] = any[]> = {
     /** `root.className` are passed to the root element of `CardWindow`. */
     className?: string;
     /** `root.style` are passed to the root element of `CardWindow`. */
-    style?: Omit<React.CSSProperties, 'overflow'>;
+    style?: Omit<CSSProperties, 'overflow'>;
   };
 
   container?: {
     /** `container.className` are passed to the scrollable large container element. */
     className?: string;
     /** `container.style` are passed to the scrollable large container element. */
-    style?: Omit<React.CSSProperties, 'width' | 'height'>;
+    style?: Omit<CSSProperties, 'width' | 'height'>;
   };
 
   /**
@@ -170,16 +170,18 @@ export const range = (_start: number, _end?: number): number[] => {
 const getColumns = (
   containerWidth: number,
   cardWidth: number,
-  spacingX: number,
+  spacing: Spacing,
   justifyContent: JustifyContent,
   maxCols: number | undefined
 ): number => {
-  if (containerWidth < cardWidth) return 0;
+  const { x, left, right } = spacing;
+  const baseWidth = containerWidth - left - right;
+  if (baseWidth < cardWidth) return 0;
   if (justifyContent === 'space-evenly') {
-    const cols = Math.max(1, Math.floor((containerWidth - spacingX) / (cardWidth + spacingX)));
+    const cols = Math.max(1, Math.floor((baseWidth - x) / (cardWidth + x)));
     return maxCols !== undefined ? Math.min(maxCols, cols) : cols;
   }
-  const cols = Math.floor((containerWidth + spacingX) / (cardWidth + spacingX));
+  const cols = Math.floor((baseWidth + x) / (cardWidth + x));
   return maxCols !== undefined ? Math.min(maxCols, cols) : cols;
 };
 
@@ -247,7 +249,12 @@ const getRenderContainerStyle = (
   justifyContent: JustifyContent
 ): CSSProperties => {
   const top = row * (card.height + spacing.y) + spacing.top;
-  return { display: 'flex', flexWrap: 'wrap', justifyContent, transform: `translate(0, ${top}px)` };
+  return {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent,
+    transform: `translate(0, ${top}px)`,
+  };
 };
 
 const getBaseItemProps = (
@@ -392,7 +399,7 @@ export const useResizeObserver = <T extends Element>(): Partial<Rect> & { ref: R
   return { ref, ...rect };
 };
 
-const defaultSpacing = { x: 8, y: 8, top: 8, bottom: 8 };
+const defaultSpacing: Spacing = { x: 8, y: 8, top: 8, bottom: 8, left: 8, right: 8 };
 
 const CardWindow: React.FC<CardWindowProps> = (props) => {
   const {
@@ -415,11 +422,17 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   const { ref, width = 0, height = 0 } = useResizeObserver<HTMLDivElement>();
   const rootRect = { width, height };
   const colsRef = useRef(0);
-  const cols = getColumns(rootRect.width, card.width, spacing.x, justifyContent, maxCols);
+  const cols = getColumns(rootRect.width, card.width, spacing, justifyContent, maxCols);
   const loadingCardCount = getLoadingCardCount(loading);
   const scrollContainerHeight = getScrollContainerHeight(cols, data.length + loadingCardCount, card, spacing, loading);
   const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...root.style, overflow: 'auto' };
-  const scrollContainerStyle = { ...container.style, width: '100%', height: scrollContainerHeight };
+  const scrollContainerStyle: CSSProperties = {
+    ...container.style,
+    width: '100%',
+    paddingLeft: spacing.left,
+    paddingRight: spacing.right,
+    height: scrollContainerHeight,
+  };
   const handleScroll: UIEventHandler<HTMLDivElement> = (e) => setOffset(e.currentTarget.scrollTop);
   const renderRows = getRenderRowRange(
     data.length,
