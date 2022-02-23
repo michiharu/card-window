@@ -54,12 +54,14 @@ describe('range', () => {
 
 describe('getColumns(container, card, spacing, justifyContent, maxCols)', () => {
   test('container.width < card.width => 0', () => {
-    expect(getColumns(100, 120, 0, 'center', undefined)).toBe(0);
+    const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0, left: 10, right: 10 };
+    expect(getColumns(120, 120, spacing, 'center', undefined)).toBe(0);
   });
   describe('container.width: 200', () => {
     const name = 'card.width: %p, spacing.x: %p => %p';
     const byCase = (justifyContent: JustifyContent, maxCols: number | undefined) => (width, x, expected) => {
-      expect(getColumns(200, width, x, justifyContent, maxCols)).toBe(expected);
+      const spacing = { x, y: 0, top: 0, bottom: 0, left: 0, right: 0 };
+      expect(getColumns(200, width, spacing, justifyContent, maxCols)).toBe(expected);
     };
     describe(`justifyContent: not space-evenly('center')`, () => {
       describe('maxCols: undefined', () =>
@@ -111,7 +113,7 @@ describe('getScrollContainerHeight(cols, length, card, spacing, loading)', () =>
   const byCase =
     (cols: number, loading?: Loading) => (length, cardHeight, spacingY, spacingTop, spacingBottom, expected) => {
       const card: Rect = { width: 0, height: cardHeight };
-      const spacing: Spacing = { x: 0, y: spacingY, top: spacingTop, bottom: spacingBottom };
+      const spacing: Spacing = { x: 0, y: spacingY, top: spacingTop, bottom: spacingBottom, left: 0, right: 0 };
       expect(getScrollContainerHeight(cols, length, card, spacing, loading)).toBe(expected);
     };
   describe('cols: 3', () => {
@@ -201,7 +203,7 @@ describe('getRenderFirstRow', () =>
     ${420} | ${200}     | ${2}
   `('offset: $offset, overScanPx: $overScanPx, expected: $expected', ({ offset, overScanPx, expected }) => {
     const card: Rect = { width: 0, height: 100 };
-    const spacing: Spacing = { x: 0, y: 10, top: 10, bottom: 10 };
+    const spacing: Spacing = { x: 0, y: 10, top: 10, bottom: 10, left: 0, right: 0 };
     expect(getRenderFirstRow(offset, overScanPx, card, spacing)).toEqual(expected);
   }));
 
@@ -225,7 +227,7 @@ describe('getRenderRows', () => {
     ({ overScanPx, containerHeight, cardHeight, y, expected }) => {
       const container: Rect = { width: 0, height: containerHeight };
       const card: Rect = { width: 0, height: cardHeight };
-      const spacing: Spacing = { x: 0, y, top: 0, bottom: 0 }; // no spacing
+      const spacing: Spacing = { x: 0, y, top: 0, bottom: 0, left: 0, right: 0 }; // no spacing
       expect(getRenderRows(overScanPx, container, card, spacing)).toEqual(expected);
     }
   );
@@ -287,7 +289,7 @@ describe('getRenderRowRange', () => {
   const byCase = (overScanPx: number) => (offset, length, loadingCards, cols, expected) => {
     const container: Rect = { width: 200, height: 200 };
     const card: Rect = { width: 0, height: 100 };
-    const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
+    const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0, left: 0, right: 0 };
     const result = getRenderRowRange(length, loadingCards, cols, offset, overScanPx, container, card, spacing);
     expect(result).toEqual(expected);
   };
@@ -317,7 +319,7 @@ describe('getRenderContainerStyle', () => {
   const name = 'row: %p, card.height: %p, spacing: { x: 0, y: %p, top: %p, bottom: 0 } => translate(0, %ppx)';
   const byCase = (row, height, y, top, expected) => {
     const card: Rect = { width: 0, height };
-    const spacing: Spacing = { x: 0, y, top, bottom: 0 };
+    const spacing: Spacing = { x: 0, y, top, bottom: 0, left: 0, right: 0 };
     expect(getRenderContainerStyle(row, card, spacing, 'space-evenly').transform).toBe(`translate(0, ${expected}px)`);
   };
   test.each([
@@ -334,7 +336,7 @@ describe('getBaseItemProps', () => {
   const name = 'index: %p, cols: %p, x: %p => marginLeft: %p, flexGrow: %p, row: %p, col: %p';
   const byCase = (justifyContent: JustifyContent) => (index, cols, x, marginLeft, flexGrow, row, col) => {
     const card: Rect = { width: 0, height: 0 };
-    const spacing: Spacing = { x, y: 0, top: 0, bottom: 0 };
+    const spacing: Spacing = { x, y: 0, top: 0, bottom: 0, left: 0, right: 0 };
     const result = getBaseItemProps(index, cols, justifyContent, card, spacing);
     expect(result.row).toBe(row);
     expect(result.col).toBe(col);
@@ -371,7 +373,7 @@ describe('getItemProps', () => {
   const name = 'rows: %p, cols: %p, length: %p => %p';
   const byCase = (lastRowAlign: LastRowAlign, loadingCards: number) => (length, rows, expected) => {
     const card: Rect = { width: 0, height: 0 };
-    const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0 };
+    const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0, left: 0, right: 0 };
     const items = getItemProps(length, loadingCards, 3, rows, card, spacing, 'space-evenly', lastRowAlign);
     expect(items.length).toBe(expected.length);
     expect(items.map((item) => item.type)).toEqual(expected);
@@ -439,7 +441,7 @@ describe('getNextOffset', () =>
     [3, 5],
   ])('before: %p, after: %p', (before, after) => {
     const card: Rect = { width: 100, height: 80 };
-    const spacing: Spacing = { x: 0, y: 20, top: 0, bottom: 0 };
+    const spacing: Spacing = { x: 0, y: 20, top: 0, bottom: 0, left: 0, right: 0 };
     range(10000).forEach((offset) => {
       const up1 = getNextOffset(offset, before, after, card, spacing);
       const down1 = getNextOffset(up1, after, before, card, spacing);
