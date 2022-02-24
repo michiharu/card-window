@@ -13,8 +13,6 @@
     "fix": "lerna run fix --scope card-window",
     "postinstall": "lerna exec yarn && npx sort-package-json",
     "package": "lerna exec --scope card-window -- npm pack",
-    "publish": "lerna exec --scope card-window -- npm publish",
-    "publish:all": "yarn ci && yarn package && yarn publish && yarn deploy",
     "start": "lerna run start --scope website",
     "test": "lerna run test --scope card-window",
     "watch": "lerna run watch --scope card-window"
