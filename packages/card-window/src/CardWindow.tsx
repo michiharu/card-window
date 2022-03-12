@@ -433,7 +433,10 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     paddingRight: spacing.right,
     height: scrollContainerHeight,
   };
-  const handleScroll: UIEventHandler<HTMLDivElement> = (e) => setOffset(e.currentTarget.scrollTop);
+  const handleScroll: UIEventHandler<HTMLDivElement> = (e) => {
+    const next = e.currentTarget.scrollTop;
+    if (Math.abs(offset - next) > card.height + spacing.y) setOffset(next);
+  }
   const renderRows = getRenderRowRange(
     data.length,
     loadingCardCount,
