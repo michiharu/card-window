@@ -26,7 +26,7 @@ const {
   getRenderRows,
   getLastRow,
   getRenderLastRow,
-  getRenderRowRange,
+  getRows,
   getRenderContainerStyle,
   getBaseItemProps,
   getItemProps,
@@ -225,10 +225,9 @@ describe('getRenderRows', () => {
   `(
     'overScanPx: $overScanPx, containerHeight: $containerHeight, cardHeight: $cardHeight, y: $y, expected: $expected',
     ({ overScanPx, containerHeight, cardHeight, y, expected }) => {
-      const container: Rect = { width: 0, height: containerHeight };
       const card: Rect = { width: 0, height: cardHeight };
       const spacing: Spacing = { x: 0, y, top: 0, bottom: 0, left: 0, right: 0 }; // no spacing
-      expect(getRenderRows(overScanPx, container, card, spacing)).toEqual(expected);
+      expect(getRenderRows(overScanPx, containerHeight, card, spacing)).toEqual(expected);
     }
   );
 });
@@ -284,13 +283,13 @@ describe('getRenderLastRow', () =>
     ({ renderFirst, rows, last, expected }) => expect(getRenderLastRow(renderFirst, rows, last)).toEqual(expected)
   ));
 
-describe('getRenderRowRange', () => {
+describe('getRows', () => {
   const name = 'offset: %p, length: %p, loadingCard: %p, cols: %p => %p';
   const byCase = (overScanPx: number) => (offset, length, loadingCards, cols, expected) => {
-    const container: Rect = { width: 200, height: 200 };
+    const containerHeight = 200;
     const card: Rect = { width: 0, height: 100 };
     const spacing: Spacing = { x: 0, y: 0, top: 0, bottom: 0, left: 0, right: 0 };
-    const result = getRenderRowRange(length, loadingCards, cols, offset, overScanPx, container, card, spacing);
+    const result = getRows(length, loadingCards, cols, offset, overScanPx, containerHeight, card, spacing);
     expect(result).toEqual(expected);
   };
 

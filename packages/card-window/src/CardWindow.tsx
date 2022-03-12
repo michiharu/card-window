@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties, Fragment, RefObject, UIEventHandler, useEffect, useRef, useState } from 'react';
+import { CSSProperties, Fragment, RefObject, UIEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 
 /** CardWindow provides the `CardWindow.children` component with this props. */
 export type CardProps<T extends any[] = any[]> = {
@@ -212,9 +212,9 @@ const getScrollContainerHeight = (
 const getRenderFirstRow = (offset: number, overScanPx: number, card: Rect, spacing: Spacing): number =>
   Math.max(0, Math.floor((offset - overScanPx) / (card.height + spacing.y)));
 
-const getRenderRows = (overScanPx: number, container: Rect, card: Rect, { y }: Spacing): number => {
+const getRenderRows = (overScanPx: number, containerHeight: number, card: Rect, { y }: Spacing): number => {
   const height = card.height + y;
-  return Math.ceil((container.height + overScanPx * 2 + y) / height);
+  return Math.ceil((containerHeight + overScanPx * 2 + y) / height);
 };
 
 const getLastRow = (length: number, loadingCards: number, cols: number): number => {
@@ -225,22 +225,24 @@ const getLastRow = (length: number, loadingCards: number, cols: number): number 
 const getRenderLastRow = (renderFirst: number, rows: number, last: number): number =>
   Math.min(renderFirst + rows, last);
 
-const getRenderRowRange = (
+const getRows = (
   length: number,
   loadingCards: number,
   cols: number,
   offset: number,
   overScanPx: number,
-  container: Rect,
+  containerHeight: number,
   card: Rect,
   spacing: Spacing
 ): [number, number] => {
   const renderFirst = getRenderFirstRow(offset, overScanPx, card, spacing);
-  const rows = getRenderRows(overScanPx, container, card, spacing);
+  const rows = getRenderRows(overScanPx, containerHeight, card, spacing);
   const last = getLastRow(length, loadingCards, cols);
   const renderLast = getRenderLastRow(renderFirst, rows, last);
   return [renderFirst, renderLast];
 };
+
+const isEqualRows = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1];
 
 const getRenderContainerStyle = (
   row: number,
@@ -347,7 +349,7 @@ export const functions = {
   getRenderRows,
   getLastRow,
   getRenderLastRow,
-  getRenderRowRange,
+  getRows,
   getRenderContainerStyle,
   getBaseItemProps,
   getItemProps,
@@ -387,16 +389,16 @@ export const useResizeObserver = <T extends Element>(): Partial<Rect> & { ref: R
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
-      set({ width, height });
+      if (width !== rect.width || height !== rect.height) set({ width, height });
     });
     if (ref.current) {
       resizeObserver.observe(ref.current);
       const { width, height } = ref.current.getBoundingClientRect();
-      set({ width, height });
+      if (width !== rect.width || height !== rect.height) set({ width, height });
     }
     return () => resizeObserver.disconnect();
   }, []);
-  return { ref, ...rect };
+  return useMemo(() => ({ ref, ...rect }), [rect]);
 };
 
 const defaultSpacing: Spacing = { x: 8, y: 8, top: 8, bottom: 8, left: 8, right: 8 };
@@ -418,13 +420,13 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
   } = props;
 
   const spacing: Spacing = { ...defaultSpacing, ...spacingProp };
-  const [offset, setOffset] = useState(0);
+  const offsetRef = useRef(0);
   const { ref, width = 0, height = 0 } = useResizeObserver<HTMLDivElement>();
-  const rootRect = { width, height };
   const colsRef = useRef(0);
-  const cols = getColumns(rootRect.width, card.width, spacing, justifyContent, maxCols);
+  const cols = getColumns(width, card.width, spacing, justifyContent, maxCols);
+  const { length } = data;
   const loadingCardCount = getLoadingCardCount(loading);
-  const scrollContainerHeight = getScrollContainerHeight(cols, data.length + loadingCardCount, card, spacing, loading);
+  const scrollContainerHeight = getScrollContainerHeight(cols, length + loadingCardCount, card, spacing, loading);
   const rootStyle = { width: '100%', minWidth: card.width, height: '100%', ...root.style, overflow: 'auto' };
   const scrollContainerStyle: CSSProperties = {
     ...container.style,
@@ -433,42 +435,32 @@ const CardWindow: React.FC<CardWindowProps> = (props) => {
     paddingRight: spacing.right,
     height: scrollContainerHeight,
   };
+  const [rows, setRows] = useState(
+    getRows(length, loadingCardCount, cols, offsetRef.current, overScanPx, height, card, spacing)
+  );
   const handleScroll: UIEventHandler<HTMLDivElement> = (e) => {
-    const next = e.currentTarget.scrollTop;
-    if (Math.abs(offset - next) > card.height + spacing.y) setOffset(next);
+    offsetRef.current = e.currentTarget.scrollTop;
+    const next = getRows(length, loadingCardCount, cols, offsetRef.current, overScanPx, height, card, spacing);
+    if (!isEqualRows(rows, next)) setRows(next);
   };
-  const renderRows = getRenderRowRange(
-    data.length,
-    loadingCardCount,
-    cols,
-    offset,
-    overScanPx,
-    rootRect,
-    card,
-    spacing
-  );
-  const renderContainerStyle = getRenderContainerStyle(renderRows[0], card, spacing, justifyContent);
-  const items = getItemProps(
-    data.length,
-    loadingCardCount,
-    cols,
-    renderRows,
-    card,
-    spacing,
-    justifyContent,
-    lastRowAlign
-  );
+  const renderContainerStyle = getRenderContainerStyle(rows[0], card, spacing, justifyContent);
+  const items = getItemProps(length, loadingCardCount, cols, rows, card, spacing, justifyContent, lastRowAlign);
 
   useEffect(() => {
     if (colsRef.current !== cols && colsRef.current !== 0 && cols !== 0 && ref.current) {
-      ref.current.scrollTop = getNextOffset(offset, colsRef.current, cols, card, spacing);
+      ref.current.scrollTop = getNextOffset(offsetRef.current, colsRef.current, cols, card, spacing);
     }
     colsRef.current = cols;
   }, [cols]);
 
   useEffect(() => {
+    const next = getRows(length, loadingCardCount, cols, offsetRef.current, overScanPx, height, card, spacing);
+    if (!isEqualRows(rows, next)) setRows(next);
+  }, [length, loadingCardCount, cols, overScanPx, height, card, spacing]);
+
+  useEffect(() => {
     if (scrollContainerHeight !== 0 && loading?.loadMore) {
-      const lastItem = items.find((item) => item.type === 'card' && item.index === data.length - 1);
+      const lastItem = items.find((item) => item.type === 'card' && item.index === length - 1);
       if (lastItem) loading.loadMore();
     }
   }, [scrollContainerHeight, loading?.loadMore, items]);
