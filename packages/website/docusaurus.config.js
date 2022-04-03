@@ -22,8 +22,8 @@ const config = {
     [
       'docusaurus-plugin-typedoc',
       {
-        entryPoints: ['../../packages/card-window/src/index.ts'],
-        tsconfig: '../../packages/card-window/tsconfig.json',
+        entryPoints: ['../../packages/main/src/index.ts'],
+        tsconfig: '../../packages/main/tsconfig.json',
       },
     ],
   ],
