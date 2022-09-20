@@ -120,7 +120,7 @@ function App() {
         {LastRowAlignDropdown}
       </Navbar>
       <Navbar>
-        <p class="navbar__item">spacing:</p>
+        <p className="navbar__item">spacing:</p>
         {XDropdown}
         {YDropdown}
         {TopDropdown}
@@ -209,6 +209,25 @@ function App() {
       <div style={{ height: 200 }}>
         <CardWindow {...props}>{SampleCard}</CardWindow>
       </div>
+    </div>
+  );
+}
+```
+
+## OnScroll
+
+Please scroll and check the logs in the browser console.
+
+```jsx live
+function App() {
+  const data = range(10000);
+  const cardRect = { width: 200, height: 120 };
+  const handleScroll = (e) => console.log(e);
+  return (
+    <div style={{ height: 300 }}>
+      <CardWindow data={data} cardRect={cardRect} onScroll={handleScroll}>
+        {SampleCard}
+      </CardWindow>
     </div>
   );
 }
