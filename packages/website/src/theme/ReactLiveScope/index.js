@@ -57,7 +57,7 @@ const useDropdown = (label, list, init = 0) => {
 const useTabs = (list, prefix = '') => {
   const [index, set] = React.useState(0);
   const element = (
-    <ul class="tabs tabs--block">
+    <ul className="tabs tabs--block">
       {list.map((item, i) => {
         let className = 'tabs__item';
         if (i === index) className += ' tabs__item--active';

@@ -23,9 +23,7 @@ const {
   getColumns,
   getScrollContainerHeight,
   getRenderFirstRow,
-  getRenderRows,
-  getLastRow,
-  getRenderLastRow,
+  getLastRowFromLength,
   getRows,
   getRenderContainerStyle,
   getBaseItemProps,
@@ -207,37 +205,12 @@ describe('getRenderFirstRow', () =>
     expect(getRenderFirstRow(offset, overScanPx, card, spacing)).toEqual(expected);
   }));
 
-describe('getRenderRows', () => {
-  test.each`
-    overScanPx | containerHeight | cardHeight | y     | expected
-    ${0}       | ${100}          | ${100}     | ${0}  | ${1}
-    ${0}       | ${101}          | ${100}     | ${0}  | ${2}
-    ${0}       | ${200}          | ${100}     | ${0}  | ${2}
-    ${0}       | ${201}          | ${100}     | ${0}  | ${3}
-    ${50}      | ${0}            | ${100}     | ${0}  | ${1}
-    ${50}      | ${1}            | ${100}     | ${0}  | ${2}
-    ${50}      | ${100}          | ${100}     | ${0}  | ${2}
-    ${50}      | ${101}          | ${100}     | ${0}  | ${3}
-    ${0}       | ${90}           | ${90}      | ${10} | ${1}
-    ${0}       | ${91}           | ${90}      | ${10} | ${2}
-    ${0}       | ${190}          | ${90}      | ${10} | ${2}
-    ${0}       | ${191}          | ${90}      | ${10} | ${3}
-  `(
-    'overScanPx: $overScanPx, containerHeight: $containerHeight, cardHeight: $cardHeight, y: $y, expected: $expected',
-    ({ overScanPx, containerHeight, cardHeight, y, expected }) => {
-      const card: Rect = { width: 0, height: cardHeight };
-      const spacing: Spacing = { x: 0, y, top: 0, bottom: 0, left: 0, right: 0 }; // no spacing
-      expect(getRenderRows(overScanPx, containerHeight, card, spacing)).toEqual(expected);
-    }
-  );
-});
-
-describe('getLastRow', () => {
+describe('getLastRowFromLength', () => {
   const name = 'length: $length, loadingCards: $loadingCards, expected: $expected';
   const byCase =
     (cols: number) =>
     ({ length, loadingCards, expected }) =>
-      expect(getLastRow(length, loadingCards, cols)).toEqual(expected);
+      expect(getLastRowFromLength(length, loadingCards, cols)).toEqual(expected);
 
   describe('cols: 3', () =>
     test.each`
@@ -269,19 +242,6 @@ describe('getLastRow', () => {
       ${5}   | ${0}         | ${2}
     `(name, byCase(2)));
 });
-
-describe('getRenderLastRow', () =>
-  test.each`
-    renderFirst | rows | last | expected
-    ${0}        | ${0} | ${0} | ${0}
-    ${0}        | ${1} | ${0} | ${0}
-    ${0}        | ${0} | ${1} | ${0}
-    ${1}        | ${1} | ${1} | ${1}
-    ${1}        | ${1} | ${3} | ${2}
-  `(
-    'renderFirst: $renderFirst | rows: $rows | last: $last | expected: $expected',
-    ({ renderFirst, rows, last, expected }) => expect(getRenderLastRow(renderFirst, rows, last)).toEqual(expected)
-  ));
 
 describe('getRows', () => {
   const name = 'offset: %p, length: %p, loadingCard: %p, cols: %p => %p';
