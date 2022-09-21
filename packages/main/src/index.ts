@@ -1,10 +1,13 @@
+import { Spacing as _Spacing } from './CardWindow';
+
 export { default as CardWindow } from './CardWindow';
 export {
   CardProps,
   Rect,
-  Spacing,
   JustifyContent,
   LastRowAlign,
+  ScrollDirection,
+  OnScrollProps,
   Loading,
   LoadingCard,
   LoadingCardComponentProps,
@@ -14,3 +17,4 @@ export {
   useResizeObserver,
   CardWindowProps,
 } from './CardWindow';
+export type Spacing = Partial<_Spacing>;

@@ -214,7 +214,7 @@ function App() {
 }
 ```
 
-## OnScroll
+## Scroll Event
 
 Please scroll and check the logs in the browser console.
 
@@ -222,7 +222,7 @@ Please scroll and check the logs in the browser console.
 function App() {
   const data = range(10000);
   const cardRect = { width: 200, height: 120 };
-  const handleScroll = (e) => console.log(e);
+  const handleScroll = (e) => console.log(e.indexesOfVisible);
   return (
     <div style={{ height: 300 }}>
       <CardWindow data={data} cardRect={cardRect} onScroll={handleScroll}>

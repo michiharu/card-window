@@ -104,14 +104,16 @@ export type LoadingRow = {
   /** `loadMore` is called when `LoadingRow.Component` is rendered. */
   loadMore?(): void;
 };
-
 export type ScrollDirection = 'forward' | 'backward';
 export type OnScrollProps = {
+  /** `direction` is either "forward" or "backward". */
   direction: ScrollDirection;
+  /** `offset` is a number. */
   offset: number;
+  /** `updateWasRequested` is a boolean. */
   updateWasRequested: boolean;
-  visibleMinIndex: number;
-  visibleMaxIndex: number;
+  /**  */
+  indexesOfVisible: number[];
 };
 
 /**
@@ -177,6 +179,13 @@ export type CardWindowProps<T extends any[] = any[]> = {
   /** `loading?` is a property for the infinite loading feature. */
   loading?: Loading;
 
+  /**
+   * `thresholdOfVisible` is used for card visibility in onScroll event.
+   * Please set a value between 0 and 1. The default is 0.5.
+   */
+  thresholdOfVisible?: number;
+
+  /** Called when the CardWindow scroll positions changes. */
   onScroll?: (props: OnScrollProps) => void;
 };
 
@@ -438,11 +447,12 @@ const CardWindow: React.FC<CardWindowProps> = React.forwardRef((props, parentRef
     justifyContent: justify = 'space-evenly',
     lastRowAlign = 'left',
     loading,
+    thresholdOfVisible = 0.5,
     onScroll,
   } = props;
 
   const { length } = data;
-  const spacing: Spacing = { ...defaultSpacing, ...spacingProp };
+  const spacing = { ...defaultSpacing, ...spacingProp };
   const offsetRef = useRef(0);
   const render = useForceUpdate();
   const { ref, width = 0, height = 0 } = useResizeObserver<HTMLDivElement>();
@@ -470,7 +480,17 @@ const CardWindow: React.FC<CardWindowProps> = React.forwardRef((props, parentRef
     const scrollUpdateWasRequested = rows[0] !== first;
     if (scrollUpdateWasRequested) render();
     if (!onScroll) return;
-    const visibleRows = getRows(length, loadingCards, cols, offsetRef.current, 0, height, card, spacing);
+    const negativeOverScanPx = -card.height * thresholdOfVisible;
+    const visibleRows = getRows(
+      length,
+      loadingCards,
+      cols,
+      offsetRef.current,
+      negativeOverScanPx,
+      height,
+      card,
+      spacing
+    );
     const visibleItems = getItemProps(
       length,
       loadingCards,
@@ -485,8 +505,7 @@ const CardWindow: React.FC<CardWindowProps> = React.forwardRef((props, parentRef
       direction: scrollDirection,
       offset: scrollOffset,
       updateWasRequested: scrollUpdateWasRequested,
-      visibleMinIndex: visibleItems.at(0).index,
-      visibleMaxIndex: visibleItems.at(-1).index,
+      indexesOfVisible: visibleItems.map((v) => v.index),
     };
     onScroll(onScrollProps);
   };
