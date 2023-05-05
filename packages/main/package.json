@@ -1,12 +1,13 @@
 {
   "name": "card-window",
-  "version": "1.9.1",
-  "description": "Card window works by only rendering part of a large data set (just enough to fill the viewport).　It is very much inspired by Brian Vaughn's react-window.",
+  "version": "1.9.2",
+  "description": "Card window works by only rendering part of a large data set (just enough to fill the viewport). It is very much inspired by Brian Vaughn's react-window.",
   "keywords": [
     "react",
     "virtualize",
     "card",
-    "list"
+    "list",
+    "grid"
   ],
   "homepage": "https://github.com/michiharu/card-window",
   "bugs": {
@@ -57,7 +58,7 @@
     "typescript": "^4.5.3"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": ">=16.13.0 <19",
+    "react-dom": ">=16.13.0 <19"
   }
 }
